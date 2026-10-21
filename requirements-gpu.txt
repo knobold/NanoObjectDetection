@@ -1,0 +1,3 @@
+# Install the package matching the CUDA runtime installed on the system.
+# For CUDA 12.x use: cupy-cuda12x
+cupy-cuda12x

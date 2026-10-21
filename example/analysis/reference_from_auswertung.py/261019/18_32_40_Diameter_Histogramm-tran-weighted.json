@@ -1,0 +1,150 @@
+{
+    "Animation": {
+        "accelerate": 1,
+        "frames_tot": 5,
+        "gamma": 0.5,
+        "x_max": "auto",
+        "x_min": "auto",
+        "y_max": "auto",
+        "y_min": "auto"
+    },
+    "Drift": {
+        "Apply": 1,
+        "Avg frames": 13,
+        "Drift rolling window size": 5,
+        "LaminarFlow": 0,
+        "Min particle per block": 40.0
+    },
+    "Exp": {
+        "ExposureTime": 0.0007,
+        "Microns_per_pixel": 0.3467,
+        "NA": 0.25,
+        "Temperature": 293.84999999999997,
+        "Viscosity": 9.846562548618592e-16,
+        "Viscosity_auto": 0,
+        "fps": 100.0,
+        "lambda": 532.0,
+        "solvent": "water"
+    },
+    "Fiber": {
+        "Center_y_px": "unknown",
+        "Mode": "Gaussian",
+        "TubeDiameter_nm": 20600.0,
+        "Waist": 10.3
+    },
+    "File": {
+        "DefaultParameterJsonFile": "C:\\NOD2\\example\\NanoObjectDetection_1_0\\default_json\\default_json.json",
+        "data_file_name": "C:\\NOD2\\example\\20_6\u00b5mKap_50Au_20_7C_100fps_5000fr_700us_V1j.tif",
+        "data_folder_name": "C:\\NOD2\\example",
+        "data_type": "tif_stack",
+        "json": "C:\\NOD2\\example\\parameter.json",
+        "use_num_frame": "all"
+    },
+    "Find": {
+        "SaturatedPixelValue": "No Saturation",
+        "tp_diameter": 7,
+        "tp_minmass": 358,
+        "tp_percentile": 20,
+        "tp_separation": 20
+    },
+    "Help": {
+        "Bead brightness": 0,
+        "Bead size": 0,
+        "Drift": 1,
+        "GuessLowestDiameter_nm": 50.0,
+        "Intensity Jump": 1,
+        "ROI": 0,
+        "Separation": 1,
+        "TryFrames": 30
+    },
+    "Link": {
+        "Dark time": 1,
+        "Dwell time stationary objects": 100,
+        "Max displacement": 10,
+        "Max displacement fix": 0.3,
+        "Min tracking frames before drift": 10.0,
+        "Min_tracking_frames": 5.0
+    },
+    "Logger": {
+        "level": "info"
+    },
+    "MSD": {
+        "Amount lagtimes auto": 1,
+        "Amount summands": 10,
+        "CheckBrownianMotion": 1,
+        "EstimateHindranceFactor": 1,
+        "Estimate_X": "Exp",
+        "EvalOnlyLongestTraj": 0,
+        "HindrancePositionAware": 0,
+        "lagtimes_max": 3,
+        "lagtimes_min": 1
+    },
+    "Plot": {
+        "Background": 0,
+        "DiamOverTraj": 1,
+        "DiamOverTraj_UseRawMass": "mean",
+        "DiameterPDF": 0,
+        "DiameterPDF_min_max_auto": 1,
+        "Histogramm": 1,
+        "Histogramm_Bin_size_nm": 0.5,
+        "Histogramm_Bins": 2154,
+        "Histogramm_Fit_1_Particle": 1,
+        "Histogramm_abs_or_rel": "both",
+        "Histogramm_max": 300.0,
+        "Histogramm_min": 10,
+        "Histogramm_min_max_auto": 0,
+        "Histogramm_time": 0,
+        "Laserfluctuation": 0,
+        "MSD_fit": 0,
+        "PDF_max": 1000.0,
+        "PDF_min": 0.0,
+        "PDF_show_fit": 0,
+        "SaveFolder": "C:\\NOD2\\example\\analysis\\old",
+        "SaveProperties": "C:\\NOD2\\example\\analysis\\old\\261019\\18_32_40_Diameter_Histogramm-tran-weighted.json",
+        "dpi": 300,
+        "fontsize": 14,
+        "save_data2csv": 1,
+        "save_json": 1
+    },
+    "PostProcessing": {
+        "ForceUltraUniform": 0,
+        "MaxDiameter": 0,
+        "MinimalBrightness": 0
+    },
+    "PreProcessing": {
+        "AllowNonPosValues": 0,
+        "BackgroundCores": 1,
+        "EnhanceSNR": 0,
+        "KernelSize": "auto",
+        "Remove_CameraOffset": 1,
+        "Remove_Laserfluctuation": 0,
+        "Remove_StaticBackground": 1,
+        "ZNCC_min": 0.7
+    },
+    "ROI": {
+        "Apply": 1,
+        "Save": 0,
+        "frame_max": 6000,
+        "frame_min": 0,
+        "x_max": 100000,
+        "x_min": 0,
+        "y_max": 100000,
+        "y_min": 0
+    },
+    "Split": {
+        "IntensityJump": 0,
+        "Max rel median intensity step": 0.906,
+        "Max_traj_length": 1000000.0,
+        "Max_traj_length_keep_tail": 0,
+        "ParticleWithLongestTrajBeforeSplit": 976
+    },
+    "StationaryObjects": {
+        "Analyze fixed spots": 1,
+        "Min distance to stationary object": 20
+    },
+    "Time": {
+        "DoRolling": 0,
+        "Frames": 100,
+        "skip_image_fac": 10
+    }
+}

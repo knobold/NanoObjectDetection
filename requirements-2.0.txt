@@ -1,0 +1,8 @@
+numpy
+pandas
+scipy
+tifffile
+trackpy
+tqdm
+matplotlib
+numba

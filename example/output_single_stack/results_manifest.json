@@ -1,0 +1,137 @@
+{
+  "output_dir": "C:\\NOD2\\example\\output_single_stack",
+  "files": [
+    "DiameterOverTrajLength_2d.png",
+    "DiameterOverTrajLength_long.png",
+    "DiameterOverTrajLength_trans.png",
+    "Diameter_Histogramm-2d-unweighted.csv",
+    "Diameter_Histogramm-2d-unweighted.png",
+    "Diameter_Histogramm-2d-weighted.csv",
+    "Diameter_Histogramm-2d-weighted.png",
+    "Diameter_Histogramm-long-unweighted.csv",
+    "Diameter_Histogramm-long-unweighted.png",
+    "Diameter_Histogramm-long-weighted.csv",
+    "Diameter_Histogramm-long-weighted.png",
+    "Diameter_Histogramm-trans-unweighted.csv",
+    "Diameter_Histogramm-trans-unweighted.png",
+    "Diameter_Histogramm-trans-weighted.csv",
+    "Diameter_Histogramm-trans-weighted.png",
+    "Global_Drift.png",
+    "MSD_fit_2d.png",
+    "MSD_fit_long.png",
+    "MSD_fit_trans.png",
+    "Trajectories_2d.png",
+    "Trajectories_long.png",
+    "Trajectories_trans.png",
+    "analysis_config.json",
+    "detections.csv",
+    "diameter_histogram_2d_unweighted.png",
+    "diameter_histogram_2d_weighted.png",
+    "diameter_histogram_x_unweighted.png",
+    "diameter_histogram_x_weighted.png",
+    "diameter_histogram_y_unweighted.png",
+    "diameter_histogram_y_weighted.png",
+    "diameter_over_trajectory_length_2d.png",
+    "diameter_over_trajectory_length_x.png",
+    "diameter_over_trajectory_length_y.png",
+    "drift.csv",
+    "drift_2d.csv",
+    "drift_x.csv",
+    "drift_y.csv",
+    "global_background.npy",
+    "msd_fits_2d.png",
+    "msd_fits_x.png",
+    "msd_fits_y.png",
+    "obj_all.csv",
+    "obj_moving_no_go_area.csv",
+    "particle_size_summary.csv",
+    "particle_size_summary_2d.csv",
+    "particle_size_summary_x.csv",
+    "particle_size_summary_y.csv",
+    "particle_sizes.csv",
+    "particle_sizes_2d.csv",
+    "particle_sizes_x.csv",
+    "particle_sizes_y.csv",
+    "sizes_df_lin_long.csv",
+    "stationary_trajectories.csv",
+    "traj_final.csv",
+    "traj_fixed.csv",
+    "traj_moving.csv",
+    "traj_no_drift.csv",
+    "trajectories.csv",
+    "trajectories_corrected.csv",
+    "trajectories_corrected_2d.csv",
+    "trajectories_corrected_x.csv",
+    "trajectories_corrected_y.csv",
+    "trajectories_x.png",
+    "trajectories_y.png",
+    "trajectory_quality.csv",
+    "trajectory_quality_2d.csv",
+    "trajectory_quality_x.csv",
+    "trajectory_quality_y.csv"
+  ],
+  "analyses": {
+    "x": {
+      "particle_sizes_path": "C:\\NOD2\\example\\output_single_stack\\particle_sizes_x.csv",
+      "particles_analyzed": 222,
+      "plot_paths": {
+        "trajectories_plot": "C:\\NOD2\\example\\output_single_stack\\Trajectories_long.png",
+        "msd_plot": "C:\\NOD2\\example\\output_single_stack\\MSD_fit_long.png",
+        "diameter_histogram_unweighted": "C:\\NOD2\\example\\output_single_stack\\Diameter_Histogramm-long-unweighted.png",
+        "diameter_histogram_weighted": "C:\\NOD2\\example\\output_single_stack\\Diameter_Histogramm-long-weighted.png",
+        "diameter_over_trajectory_plot": "C:\\NOD2\\example\\output_single_stack\\DiameterOverTrajLength_long.png",
+        "global_drift_plot": "C:\\NOD2\\example\\output_single_stack\\Global_Drift.png"
+      }
+    },
+    "y": {
+      "particle_sizes_path": "C:\\NOD2\\example\\output_single_stack\\particle_sizes_y.csv",
+      "particles_analyzed": 218,
+      "plot_paths": {
+        "trajectories_plot": "C:\\NOD2\\example\\output_single_stack\\Trajectories_trans.png",
+        "msd_plot": "C:\\NOD2\\example\\output_single_stack\\MSD_fit_trans.png",
+        "diameter_histogram_unweighted": "C:\\NOD2\\example\\output_single_stack\\Diameter_Histogramm-trans-unweighted.png",
+        "diameter_histogram_weighted": "C:\\NOD2\\example\\output_single_stack\\Diameter_Histogramm-trans-weighted.png",
+        "diameter_over_trajectory_plot": "C:\\NOD2\\example\\output_single_stack\\DiameterOverTrajLength_trans.png",
+        "global_drift_plot": "C:\\NOD2\\example\\output_single_stack\\Global_Drift.png"
+      }
+    },
+    "2d": {
+      "particle_sizes_path": "C:\\NOD2\\example\\output_single_stack\\particle_sizes_2d.csv",
+      "particles_analyzed": 216,
+      "plot_paths": {
+        "trajectories_plot": "C:\\NOD2\\example\\output_single_stack\\Trajectories_2d.png",
+        "msd_plot": "C:\\NOD2\\example\\output_single_stack\\MSD_fit_2d.png",
+        "diameter_histogram_unweighted": "C:\\NOD2\\example\\output_single_stack\\Diameter_Histogramm-2d-unweighted.png",
+        "diameter_histogram_weighted": "C:\\NOD2\\example\\output_single_stack\\Diameter_Histogramm-2d-weighted.png",
+        "diameter_over_trajectory_plot": "C:\\NOD2\\example\\output_single_stack\\DiameterOverTrajLength_2d.png",
+        "global_drift_plot": "C:\\NOD2\\example\\output_single_stack\\Global_Drift.png"
+      }
+    }
+  },
+  "plot_paths": {
+    "x": {
+      "trajectories_plot": "C:\\NOD2\\example\\output_single_stack\\Trajectories_long.png",
+      "msd_plot": "C:\\NOD2\\example\\output_single_stack\\MSD_fit_long.png",
+      "diameter_histogram_unweighted": "C:\\NOD2\\example\\output_single_stack\\Diameter_Histogramm-long-unweighted.png",
+      "diameter_histogram_weighted": "C:\\NOD2\\example\\output_single_stack\\Diameter_Histogramm-long-weighted.png",
+      "diameter_over_trajectory_plot": "C:\\NOD2\\example\\output_single_stack\\DiameterOverTrajLength_long.png",
+      "global_drift_plot": "C:\\NOD2\\example\\output_single_stack\\Global_Drift.png"
+    },
+    "y": {
+      "trajectories_plot": "C:\\NOD2\\example\\output_single_stack\\Trajectories_trans.png",
+      "msd_plot": "C:\\NOD2\\example\\output_single_stack\\MSD_fit_trans.png",
+      "diameter_histogram_unweighted": "C:\\NOD2\\example\\output_single_stack\\Diameter_Histogramm-trans-unweighted.png",
+      "diameter_histogram_weighted": "C:\\NOD2\\example\\output_single_stack\\Diameter_Histogramm-trans-weighted.png",
+      "diameter_over_trajectory_plot": "C:\\NOD2\\example\\output_single_stack\\DiameterOverTrajLength_trans.png",
+      "global_drift_plot": "C:\\NOD2\\example\\output_single_stack\\Global_Drift.png"
+    },
+    "2d": {
+      "trajectories_plot": "C:\\NOD2\\example\\output_single_stack\\Trajectories_2d.png",
+      "msd_plot": "C:\\NOD2\\example\\output_single_stack\\MSD_fit_2d.png",
+      "diameter_histogram_unweighted": "C:\\NOD2\\example\\output_single_stack\\Diameter_Histogramm-2d-unweighted.png",
+      "diameter_histogram_weighted": "C:\\NOD2\\example\\output_single_stack\\Diameter_Histogramm-2d-weighted.png",
+      "diameter_over_trajectory_plot": "C:\\NOD2\\example\\output_single_stack\\DiameterOverTrajLength_2d.png",
+      "global_drift_plot": "C:\\NOD2\\example\\output_single_stack\\Global_Drift.png"
+    }
+  }
+}

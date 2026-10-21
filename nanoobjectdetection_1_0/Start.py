@@ -1,0 +1,316 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Sep 13 15:20:48 2019
+
+@author: foersterronny
+@small author : Jisoo
+# We try new branch develope
+
+set up everything from scratch to evaluate new experimental data
+"""
+
+import nanoobjectdetection_1_0 as nd
+import shutil
+import os
+import json
+from tkinter import filedialog
+
+
+
+def NewEvaluation():
+    """
+    Run this function to prepare new data set for evalution
+
+    Returns
+    -------
+    None.
+
+    """
+    
+    datatype = nd.handle_data.GetInput("Is your data stored in : \
+                                       \n 1 - a single file (tif-stack) or \
+                                       \n 2 - multiple files (tif-series) ?\
+                                       \n\n"
+                                       , ["1", "2"])
+
+    # select data type
+    if datatype == 1:
+        data_type = "tif_stack"
+    else:
+        data_type = "tif_series"
+    
+    # select the data
+    data_file_name = filedialog.askopenfilename(title = "Please select the file", filetypes = (("*tif-files", "*.tif"),("*tiff-files", "*.tiff")))
+
+    nd.logger.info("data_file_name: %s", data_file_name)
+
+    # get data folder
+    data_folder_name = os.path.dirname(data_file_name)
+
+    # where shall the evaluation go?
+    dir_results = filedialog.askdirectory(title = "Where should the evaluation scripts and results be saved?")
+    
+    nd.logger.info("store results into: %s", dir_results)
+    
+    # copy default "auswertung.py" into that folder
+    path_aus_origin = os.path.dirname(nd.__file__) + "\\default_files\\default_auswertung.py"
+    path_aus_new = dir_results + "/auswertung.py"
+    
+    shutil.copy2(path_aus_origin, path_aus_new)
+    
+    
+    # copy default json into that folder
+    path_json_origin = os.path.dirname(nd.__file__) + "\\default_json\\default_json.json"
+    mypath = dir_results + "/parameter.json"
+    
+    shutil.copy2(path_json_origin, mypath)
+
+    with open(mypath) as json_file:
+        settings = json.load(json_file)
+    
+
+    # Setup Parameters
+    # Choose predefined experimental configurations (Objective, Microscope, Camera)
+    
+    pre_select = nd.handle_data.GetInput("Please select a number: \
+          \n The following setups are implemented \
+          \n 1 - new \
+          \n 2 - Olympus_4x_0-10_plan_n_Olympus_corpus_Basler_AC4096-40um_camera \
+          \n 3 - Olympus_10x_0-25_plan_n_Olympus_corpus_Basler_AC4096-40um_camera \
+          \n 4 - Zeiss_5x_0-13_HD_Olympus_corpus_Basler_AC4096-40um_camera \
+          \n 5 - Zeiss 20x 0_40 epiplan Objective with Basler AC4096-40um_camera\
+          \n 6 - Zeiss 10x 0_20 epiplan Objective with Basler AC4096-40um_camera\
+          \n 7 - Zeiss 10x 0_3 epiplan neofluar Objective with Basler AC4096-40um_camera\
+        \n\n"
+        , ["1", "2", "3", "4", "5", "6", "7"])
+    
+    
+    # load the predefined configuration into the parameter file
+    if pre_select in [2,3,4,5,6,7]:
+        nd_path = os.path.dirname(nd.__file__)
+        
+        if pre_select == 2:
+            nd.logger.info("Load: Olympus_4x_0-10_plan_n_Olympus_corpus_Basler_AC4096-40um_camera")
+            path_json_origin = nd_path + "\\default_json\\setup\\Olympus_4x_0-10_plan_n_Olympus_corpus_Basler_AC4096-40um_camera.json"
+            
+        elif pre_select == 3:
+            nd.logger.info("Load: Olympus_10x_0-25_plan_n_Olympus_corpus_Basler_AC4096-40um_camera")
+            path_json_origin = nd_path + "\\default_json\\setup\\Olympus_10x_0-25_plan_n_Olympus_corpus_Basler_AC4096-40um_camera.json"
+            
+        elif pre_select == 4:
+            nd.logger.info("Zeiss_5x_0-13_HD_Olympus_corpus_Basler_AC4096-40um_camera")
+            path_json_origin = nd_path + "\\default_json\\setup\\Zeiss_5x_0-13_HD_Olympus_corpus_Basler_AC4096-40um_camera.json"
+            
+        elif pre_select == 5:
+            nd.logger.info("Zeiss 20x 0_40 epiplan Objective with Basler AC4096-40um_camera")
+            path_json_origin = nd_path + "\\default_json\\setup\\default_json_20x 0_40 epiplan Objective with Basler cam.json"
+            
+        elif pre_select == 6:
+            nd.logger.info("Zeiss 10x 0_20 epiplan Objective with Basler AC4096-40um_camera")
+            path_json_origin = nd_path + "\\default_json\\setup\\default_json_10x 0_20 epiplan Objective with Basler cam.json"
+            
+        elif pre_select == 7:
+            nd.logger.info("Zeiss 10x 0_3 epiplan neofluar Objective with Basler AC4096-40um_camera")
+            path_json_origin = nd_path + "\\default_json\\setup\\Zeiss_10x_0-3_plan_neofluar_Olympus_corpus_Basler_AC4096-40um_camera.json"
+        
+            
+            
+        with open(path_json_origin) as json_file:
+            pre_settings = json.load(json_file)
+        
+        settings["Exp"]["NA"]                = pre_settings["Exp"]["NA"]
+        settings["Exp"]["Microns_per_pixel"] = pre_settings["Exp"]["Microns_per_pixel"]
+        # settings["Exp"]["Temperature"]       = pre_settings["Exp"]["Temperature"]
+        
+    else:
+        nd.logger.warning("No standard objective given.")
+        nd.logger.info("Please insert setup parameters:")
+        settings["Exp"]["NA"]                = float(input("NA = "))
+        settings["Exp"]["Microns_per_pixel"] = float(input("Microns per pixel [um/px] = "))
+        # settings["Exp"]["Temperature"]       = float(input("Temperature [K] (22C = 295K) = "))
+        
+            
+            
+    # Fiber Parameters
+    # choose predefined fiber parameters
+    pre_select = nd.handle_data.GetInput("Please select a number: \
+          \n The following fibers are implemented \
+          \n 1 - new \
+          \n 2 - 1250b3 \
+          \n 3 - 1276b1_start \
+          \n 4 - 18um Lightcage \
+          \n 5 - No Fiber\
+          \n 6 - Insert Capillary \
+          \n\n"
+        , ["1", "2", "3", "4", "5", "6"])
+    
+    
+    if pre_select in [2, 3, 4, 5]:
+        nd_path = os.path.dirname(nd.__file__)
+        
+        if pre_select == 2:
+            nd.logger.info("Load: Fiber 1250b3")
+            path_json_origin = nd_path + "\\default_json\\fiber\\1250b3.json"
+                        
+        elif pre_select == 3:
+            nd.logger.info("Load: Fiber 1267b1_start")
+            path_json_origin = nd_path + "\\default_json\\fiber\\1267b1_start.json"
+                        
+        elif pre_select == 4:
+            nd.logger.info("Load: LightCage.json")
+            path_json_origin = nd_path + "\\default_json\\fiber\\LightCage.json"
+            
+        elif pre_select == 5:
+            nd.logger.info("Load: NoFiber.json")
+            path_json_origin = nd_path + "\\default_json\\fiber\\NoFiber.json"
+            
+            
+        with open(path_json_origin) as json_file:
+            pre_settings = json.load(json_file)
+        
+        settings["Fiber"]["TubeDiameter_nm"] = pre_settings["Fiber"]["TubeDiameter_nm"]
+        settings["Fiber"]["Waist"] = pre_settings["Fiber"]["Waist"]
+        settings["Fiber"]["Mode"] = pre_settings["Fiber"]["Mode"]
+      
+        
+    elif pre_select == 6:
+        nd.logger.info("Insert capillary")
+        
+        settings["Fiber"]["TubeDiameter_nm"] = float(input("Channel Diameter [um] = ")) * 1000
+        
+        # approximation of waist half the diameter. could be larger or smaller!
+        settings["Fiber"]["Waist"] = settings["Fiber"]["TubeDiameter_nm"] / 2 / 1000
+        settings["Fiber"]["Mode"] = "Gaussian"        
+        
+        
+    else:
+        nd.logger.warning("No standard fiber given.")
+        nd.logger.info("Please insert setup parameters:")
+        
+        settings["Fiber"]["TubeDiameter_nm"] = float(input("Channel Diameter [um] = ")) * 1000
+        settings["Fiber"]["Waist"] = float(input("Beam waist [um] = "))
+        settings["Fiber"]["Mode"] = (input("Fiber mode [Speckle, Gaussian or Evanescent]: "))
+                  
+            
+    #Experimental Parameters
+    nd.logger.info("Please insert experimental parameters.")
+    settings["Exp"]["lambda"]            = float(input("Wavelength [nm] = "))
+    settings["Exp"]["fps"]               = float(input("Framerate [fps] = "))
+    settings["Exp"]["ExposureTime"]      = float(input("Exposure Time [ms] = ")) / 1000
+    settings["Help"]["GuessLowestDiameter_nm"] = float(input("What is the lower limit of diameter (in nm) you expect?\n"))
+        
+    temp = 273.15 + float(input("Temperature [C] = "))
+    settings["Exp"]["Temperature"] = temp # [K]
+    
+    # Get temperature and corresponding viscocity
+    adjustT = nd.handle_data.GetInput("Get fluid and viscosity: \
+                                      \n 0 - Fluid is water (viscosity calculated automatically) \
+                                      \n 1 - Insert liquid and viscosity yourself"
+                                      , ["0","1"])
+
+    if adjustT == 0:
+        solv = "water"
+        settings["Exp"]["solvent"] = solv
+        settings["Exp"]["Viscosity"] = nd.Experiment.GetViscosity(temp,solv)
+
+    else:
+        solv = input("Solvent (standard is water; dont use quotes): ")
+        visc = float(input("Viscosity [mPa * s] = "))
+        visc = visc * 1E-15 # transfer into funny unit N/(um^2)*s from mPa*s
+        
+        settings["Exp"]["Viscosity"]       = visc
+
+    # get the full path of the data
+    settings["File"]["data_file_name"]   = os.path.normpath(data_file_name)
+    settings["File"]["data_folder_name"] = os.path.normpath(data_folder_name)
+    settings["File"]["data_type"]        = os.path.normpath(data_type)
+
+
+    # In[Help Functions Parameters]
+    help_options = nd.handle_data.GetInput("Which help functions do you want to use? \
+            \n 0 - none \
+            \n 1 - auto \
+            \n 2 - auto, but known image diameter\
+            \n 3 - select yourself \n", ["0", "1", "2", "3"])
+                
+    if help_options == 0:
+        nd.logger.info("Switch all help functions off.")
+        settings["Help"]["ROI"] = 0
+        settings["Help"]["Bead brightness"] = 0
+        settings["Help"]["Bead size"] = 0
+        settings["Help"]["Separation"] = 0
+        settings["Help"]["Drift"] = 0
+        
+    elif help_options == 1:
+        nd.logger.info("Switch recommended help functions on.")
+        settings["Help"]["ROI"] = 0
+        settings["Help"]["Bead brightness"] = 1
+        settings["Help"]["Bead size"] = 1
+        settings["Help"]["Separation"] = 1
+        settings["Help"]["Drift"] = 1
+        
+    elif help_options == 2:
+        nd.logger.info("Switch recommended help functions on.")
+        settings["Help"]["ROI"] = 0
+        settings["Help"]["Bead brightness"] = 1
+        settings["Help"]["Bead size"] = 0
+        settings["Help"]["Separation"] = 1
+        settings["Help"]["Drift"] = 1
+
+    else:        
+        nd.logger.info("Choose the help functions on your own.")
+        settings["Help"]["ROI"] = nd.handle_data.GetInput("Do you want help with the >region of intertest (ROI)< ? \
+                \n 0 - no \
+                \n 1 - yes \n",
+                ["0", "1"])
+       
+        
+        settings["Help"]["Bead brightness"] = nd.handle_data.GetInput("Do you want help with the >minimal bead brightness< ? \
+                \n 0 - no \
+                \n 1 - fully automized parameter estimation \n",
+                ["0", "1"])
+            
+        
+        settings["Help"]["Bead size"] = nd.handle_data.GetInput("Do you want help with the >bead size< ? \
+                \n 0 = no \
+                \n 1 - fully automized parameter estimation \n",
+                ["0", "1"])
+        
+            
+        settings["Help"]["Separation"] = nd.handle_data.GetInput("Do you want help with the maximum allowed movement of a particle between two frames >Max Displacement< and the minimal distance to beads must have >Separation Data<? \
+                \n 0 = no \
+                \n auto - fully automized parameter estimation \n",
+                ["0", "auto"])
+ 
+    
+        settings["Help"]["Drift"] = nd.handle_data.GetInput("Do you want help how many frames are used to average the drift out of the system >Drift smoothing frames<? \
+                \n 0 = no \
+                \n 1 - fully automized parameter estimation \n",
+                ["0", "1"])
+
+    if settings["Help"]["Bead size"] == 0:
+        valid_input = False
+        while valid_input == False:
+            myin = float(input("What is the image diameter (odd integer) \n"))
+            
+            if myin%2 == 1:
+                valid_input = True
+                settings["Find"]["tp_diameter"]  = int(myin)
+            else:
+                nd.logger.warning("that was not an odd integer")
+
+
+    # Save Everything
+    # Make slash and backslash right
+    settings["File"]["json"] = mypath.replace("/","\\")
+
+    # save the stuff   
+    nd.handle_data.WriteJson(mypath.replace("/","\\"), settings)    
+
+    # did not no where to put this best.
+    nd.logger.info("Information: You can insert the startup.py to your Python Programming to load all the required packages automatically.")        
+
+    print("\nGo to \n{}\n in the explorer and open the py-script and json parameter file.".format(dir_results.replace("/","\\")))
+    
+    
+    

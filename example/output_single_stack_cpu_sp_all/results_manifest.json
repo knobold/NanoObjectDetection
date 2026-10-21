@@ -1,0 +1,131 @@
+{
+  "output_dir": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all",
+  "files": [
+    "DiameterOverTrajLength_2d.csv",
+    "DiameterOverTrajLength_2d.png",
+    "DiameterOverTrajLength_long.csv",
+    "DiameterOverTrajLength_long.png",
+    "DiameterOverTrajLength_trans.csv",
+    "DiameterOverTrajLength_trans.png",
+    "Diameter_Histogramm-2d-unweighted.csv",
+    "Diameter_Histogramm-2d-unweighted.png",
+    "Diameter_Histogramm-2d-weighted.csv",
+    "Diameter_Histogramm-2d-weighted.png",
+    "Diameter_Histogramm-long-unweighted.csv",
+    "Diameter_Histogramm-long-unweighted.png",
+    "Diameter_Histogramm-long-weighted.csv",
+    "Diameter_Histogramm-long-weighted.png",
+    "Diameter_Histogramm-trans-unweighted.csv",
+    "Diameter_Histogramm-trans-unweighted.png",
+    "Diameter_Histogramm-trans-weighted.csv",
+    "Diameter_Histogramm-trans-weighted.png",
+    "Global_Drift.png",
+    "MSD_fit_2d.png",
+    "MSD_fit_long.png",
+    "MSD_fit_trans.png",
+    "Trajectories_2d.png",
+    "Trajectories_long.png",
+    "Trajectories_trans.png",
+    "analysis_config.json",
+    "detections.csv",
+    "drift.csv",
+    "drift_2d.csv",
+    "drift_x.csv",
+    "drift_y.csv",
+    "global_background.npy",
+    "obj_all.csv",
+    "obj_moving_no_go_area.csv",
+    "particle_size_summary.csv",
+    "particle_size_summary_2d.csv",
+    "particle_size_summary_x.csv",
+    "particle_size_summary_y.csv",
+    "particle_sizes.csv",
+    "particle_sizes_2d.csv",
+    "particle_sizes_x.csv",
+    "particle_sizes_y.csv",
+    "sizes_df_lin_2d.csv",
+    "sizes_df_lin_long.csv",
+    "sizes_df_lin_trans.csv",
+    "stationary_trajectories.csv",
+    "traj_final.csv",
+    "traj_final_2d.csv",
+    "traj_final_long.csv",
+    "traj_final_trans.csv",
+    "traj_fixed.csv",
+    "traj_moving.csv",
+    "traj_no_drift.csv",
+    "trajectories.csv",
+    "trajectories_corrected.csv",
+    "trajectories_corrected_2d.csv",
+    "trajectories_corrected_x.csv",
+    "trajectories_corrected_y.csv",
+    "trajectory_quality.csv",
+    "trajectory_quality_2d.csv",
+    "trajectory_quality_x.csv",
+    "trajectory_quality_y.csv"
+  ],
+  "analyses": {
+    "x": {
+      "particle_sizes_path": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/particle_sizes_x.csv",
+      "particles_analyzed": 306,
+      "plot_paths": {
+        "trajectories_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Trajectories_long.png",
+        "msd_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/MSD_fit_long.png",
+        "diameter_histogram_unweighted": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Diameter_Histogramm-long-unweighted.png",
+        "diameter_histogram_weighted": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Diameter_Histogramm-long-weighted.png",
+        "diameter_over_trajectory_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/DiameterOverTrajLength_long.png",
+        "global_drift_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Global_Drift.png"
+      }
+    },
+    "y": {
+      "particle_sizes_path": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/particle_sizes_y.csv",
+      "particles_analyzed": 329,
+      "plot_paths": {
+        "trajectories_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Trajectories_trans.png",
+        "msd_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/MSD_fit_trans.png",
+        "diameter_histogram_unweighted": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Diameter_Histogramm-trans-unweighted.png",
+        "diameter_histogram_weighted": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Diameter_Histogramm-trans-weighted.png",
+        "diameter_over_trajectory_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/DiameterOverTrajLength_trans.png",
+        "global_drift_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Global_Drift.png"
+      }
+    },
+    "2d": {
+      "particle_sizes_path": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/particle_sizes_2d.csv",
+      "particles_analyzed": 200,
+      "plot_paths": {
+        "trajectories_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Trajectories_2d.png",
+        "msd_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/MSD_fit_2d.png",
+        "diameter_histogram_unweighted": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Diameter_Histogramm-2d-unweighted.png",
+        "diameter_histogram_weighted": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Diameter_Histogramm-2d-weighted.png",
+        "diameter_over_trajectory_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/DiameterOverTrajLength_2d.png",
+        "global_drift_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Global_Drift.png"
+      }
+    }
+  },
+  "plot_paths": {
+    "x": {
+      "trajectories_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Trajectories_long.png",
+      "msd_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/MSD_fit_long.png",
+      "diameter_histogram_unweighted": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Diameter_Histogramm-long-unweighted.png",
+      "diameter_histogram_weighted": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Diameter_Histogramm-long-weighted.png",
+      "diameter_over_trajectory_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/DiameterOverTrajLength_long.png",
+      "global_drift_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Global_Drift.png"
+    },
+    "y": {
+      "trajectories_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Trajectories_trans.png",
+      "msd_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/MSD_fit_trans.png",
+      "diameter_histogram_unweighted": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Diameter_Histogramm-trans-unweighted.png",
+      "diameter_histogram_weighted": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Diameter_Histogramm-trans-weighted.png",
+      "diameter_over_trajectory_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/DiameterOverTrajLength_trans.png",
+      "global_drift_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Global_Drift.png"
+    },
+    "2d": {
+      "trajectories_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Trajectories_2d.png",
+      "msd_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/MSD_fit_2d.png",
+      "diameter_histogram_unweighted": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Diameter_Histogramm-2d-unweighted.png",
+      "diameter_histogram_weighted": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Diameter_Histogramm-2d-weighted.png",
+      "diameter_over_trajectory_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/DiameterOverTrajLength_2d.png",
+      "global_drift_plot": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/output_single_stack_cpu_sp_all/Global_Drift.png"
+    }
+  }
+}

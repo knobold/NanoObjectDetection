@@ -1,0 +1,47 @@
+{
+  "format": "nanoobjectdetection-2.0-chunks-v1",
+  "source": "/mnt/c/Users/t1mst/OneDrive/IPHT/Python/NanoObjectDetection/example/20_6\u00b5mKap_50Au_20_7C_100fps_5000fr_700us_V1j.tif",
+  "axes": "ZYX",
+  "dtype": "uint16",
+  "frame_start": 0,
+  "frame_stop": 5000,
+  "chunk_frames": 1833,
+  "chunk_overlap_frames": 20,
+  "shape": [
+    5000,
+    90,
+    4096
+  ],
+  "chunks": [
+    {
+      "file": "chunks/chunk_000000.tif",
+      "frame_start": 0,
+      "frame_stop": 1833,
+      "shape": [
+        1833,
+        90,
+        4096
+      ]
+    },
+    {
+      "file": "chunks/chunk_000001.tif",
+      "frame_start": 1813,
+      "frame_stop": 3646,
+      "shape": [
+        1833,
+        90,
+        4096
+      ]
+    },
+    {
+      "file": "chunks/chunk_000002.tif",
+      "frame_start": 3626,
+      "frame_stop": 5000,
+      "shape": [
+        1374,
+        90,
+        4096
+      ]
+    }
+  ]
+}
