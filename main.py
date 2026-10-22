@@ -11,7 +11,10 @@ import argparse
 from copy import deepcopy
 from dataclasses import asdict, replace
 import json
-import resource
+try:
+    import resource
+except ImportError:
+    resource = None
 from pathlib import Path
 import threading
 import time
@@ -280,7 +283,9 @@ def _log_stage(stage: str) -> None:
     print(f"[{time.strftime('%H:%M:%S')}] {stage} - {_memory_report()}", flush=True)
 
 
-def _peak_rss_gib() -> float:
+def _peak_rss_gib() -> float | None:
+    if resource is None:
+        return None
     return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024**2
 
 
@@ -327,10 +332,11 @@ def run(parameter_file: Path | None = None, *, input_file: Path = INPUT_FILE,
     finally:
         stop.set()
         watcher.join(timeout=3)
-        print(
-            f"[PEAK MEMORY] Peak process RSS: {_peak_rss_gib():.2f} GiB",
-            flush=True,
-        )
+        peak_rss = _peak_rss_gib()
+        if peak_rss is None:
+            print("[PEAK MEMORY] Peak process RSS unavailable on this platform.", flush=True)
+        else:
+            print(f"[PEAK MEMORY] Peak process RSS: {peak_rss:.2f} GiB", flush=True)
 
 
 def _run_analysis(parameter_file: Path | None = None, *, input_file: Path = INPUT_FILE,
@@ -471,8 +477,7 @@ def _run_analysis(parameter_file: Path | None = None, *, input_file: Path = INPU
 if __name__ == "__main__":
     start_time = time.time()
     parser = argparse.ArgumentParser()
-    if LEGACY_PARAMETER_FILE is not None:
-        parser.add_argument("--parameter-file", type=Path, default=LEGACY_PARAMETER_FILE)
+    parser.add_argument("--parameter-file", type=Path, default=LEGACY_PARAMETER_FILE)
     parser.add_argument("--input-file", type=Path, default=INPUT_FILE)
     parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
     parser.add_argument("--processing-mode", choices=("chunked", "single_stack"),
