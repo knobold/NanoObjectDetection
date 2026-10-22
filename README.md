@@ -47,16 +47,42 @@ runtime instead. The pipeline reports an error if GPU mode is requested but a
 usable CUDA device is unavailable. Trackpy localization, linking, and MSD
 fitting remain CPU operations.
 
-## Run an analysis
+## Run from an IDE (recommended)
 
-The default settings in `main.py` point to the included example TIFF. To run
-that example, activate the environment and execute:
+The default settings in `main.py` point to the included example TIFF. You can
+run that file directly from VS Code, PyCharm, or another Python IDE:
 
-```powershell
-python .\main.py
+1. Open the repository folder in your IDE.
+2. Select the Python interpreter from the `.venv` environment created above.
+   In VS Code, use **Python: Select Interpreter**; in PyCharm, select the
+   project interpreter in the Python interpreter settings.
+3. Open `main.py` and review the settings near the top of the file. For your
+   own experiment, update `INPUT_FILE`, `OUTPUT_DIR`, and the experiment and
+   analysis settings in `main.py`. The input and output paths can be absolute
+   paths or paths built from `ROOT`.
+4. Run `main.py` with the IDE's **Run Python File** or **Run** action. The
+   default example stack will run without command-line arguments.
+
+To load a legacy-format JSON instead of the in-code `PARAMETERS`, set
+`LEGACY_PARAMETER_FILE` in `main.py`, for example:
+
+```python
+LEGACY_PARAMETER_FILE = ROOT / "example" / "parameter.json"
 ```
 
-For your own data, specify the TIFF stack and an output folder:
+Then update the input/output paths as needed and run `main.py`. To use
+chunked processing or GPU preprocessing from an IDE, add the relevant
+arguments to that IDE's run configuration; for example, use
+`--processing-mode chunked` or `--gpu`. Select the same `.venv` interpreter
+for the run configuration so the installed dependencies are available.
+
+Before analyzing experimental data, review the camera calibration,
+acquisition rate, temperature, viscosity, channel dimensions, ROI, and
+Trackpy settings in `main.py` or the selected parameter file.
+
+## Run from a terminal
+
+The same script can be run with options from PowerShell:
 
 ```powershell
 python .\main.py `
@@ -65,7 +91,7 @@ python .\main.py `
   --processing-mode single_stack
 ```
 
-To use a legacy-format parameter file such as the supplied example:
+To use a legacy-format parameter file:
 
 ```powershell
 python .\main.py `
@@ -76,12 +102,10 @@ python .\main.py `
 ```
 
 The input and output command-line paths override the corresponding paths in
-the parameter JSON. If you omit `--parameter-file`, the analysis settings
-defined in `main.py` are used. Review the camera calibration, acquisition
-rate, temperature, viscosity, channel dimensions, ROI, and Trackpy settings
-in `main.py` or your parameter file before analyzing experimental data.
+the parameter JSON. If `--parameter-file` is omitted, the analysis settings
+defined in `main.py` are used.
 
-Available execution options:
+Available command-line options:
 
 | Option | Purpose |
 |---|---|
