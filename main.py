@@ -21,6 +21,7 @@ except ImportError:
 from pathlib import Path
 import threading
 import time
+from typing import Literal
 
 from nanoobjectdetection_2_0.legacy_config import (
     load_parameter_file,
@@ -34,6 +35,9 @@ ROOT = Path(__file__).resolve().parent
 
 ## Processing parameters
 PROCESSING_MODE = "single_stack"  # "chunked" = image store processed in blocks (large stacks), "single_stack" = frame by frame from the TIFF
+BACKGROUND_STACK_STORAGE = "memory"  # "memory" = keep the uint16 stack in RAM, "disk" = use a temporary disk-backed map
+ANALYSIS_DIMENSIONS = ("x", "y", "2d")
+DimensionSelection = Literal["all", "x", "y", "2d"]
 INPUT_FILE = ROOT / "example" / "20_6µmKap_50Au_20_7C_100fps_5000fr_700us_V1j.tif"  # image stack to analyse
 OUTPUT_DIR = ROOT / "example" / "output_single_cpu"  # results folder
 LEGACY_PARAMETER_FILE = None #ROOT / "example" / "parameters.json"  # path to legacy parameter file
@@ -383,9 +387,20 @@ def _watch_memory(stop: threading.Event, min_available_gb: float = 1.0) -> None:
             warned = True
 
 
+def _selected_dimensions(dimension: DimensionSelection) -> tuple[str, ...]:
+    if dimension == "all":
+        return ANALYSIS_DIMENSIONS
+    if dimension in ANALYSIS_DIMENSIONS:
+        return (dimension,)
+    raise ValueError("dimension must be one of: all, x, y, 2d")
+
+
 def run(parameter_file: Path | None = None, *, input_file: Path = INPUT_FILE,
         output_dir: Path = OUTPUT_DIR, processing_mode: str = PROCESSING_MODE,
-        gpu_enabled: bool = GPU_ENABLED) -> dict:
+        gpu_enabled: bool = GPU_ENABLED,
+        background_stack_storage: str = BACKGROUND_STACK_STORAGE,
+        dimension: DimensionSelection = "all") -> dict:
+    dimensions = _selected_dimensions(dimension)
     tiff = tiff_info(input_file)
     shape = tiff["shape"]
     frame_count = shape[0] if len(shape) > 2 else tiff["pages"]
@@ -404,6 +419,8 @@ def run(parameter_file: Path | None = None, *, input_file: Path = INPUT_FILE,
             output_dir=output_dir,
             processing_mode=processing_mode,
             gpu_enabled=gpu_enabled,
+            background_stack_storage=background_stack_storage,
+            dimensions=dimensions,
         )
     except MemoryError:
         print(f"[OUT OF MEMORY] {_memory_report()}", flush=True)
@@ -420,7 +437,9 @@ def run(parameter_file: Path | None = None, *, input_file: Path = INPUT_FILE,
 
 def _run_analysis(parameter_file: Path | None = None, *, input_file: Path = INPUT_FILE,
                   output_dir: Path = OUTPUT_DIR, processing_mode: str = PROCESSING_MODE,
-                  gpu_enabled: bool = GPU_ENABLED) -> dict:
+                  gpu_enabled: bool = GPU_ENABLED,
+                  background_stack_storage: str = BACKGROUND_STACK_STORAGE,
+                  dimensions: tuple[str, ...] = ANALYSIS_DIMENSIONS) -> dict:
     _log_stage("Loading configuration")
     if parameter_file is None:
         config, settings = load_parameter_settings(PARAMETERS, ROOT / "main.py")
@@ -434,6 +453,7 @@ def _run_analysis(parameter_file: Path | None = None, *, input_file: Path = INPU
         output_dir=output_dir,
         processing_mode=processing_mode,
         gpu_enabled=gpu_enabled,
+        background_stack_storage=background_stack_storage,
         chunk_frames=CHUNK_FRAMES,
         chunk_overlap_frames=CHUNK_OVERLAP_FRAMES,
         locate_workers=LOCATE_WORKERS,
@@ -451,7 +471,7 @@ def _run_analysis(parameter_file: Path | None = None, *, input_file: Path = INPU
     )
     analyses = {}
     plot_paths = {}
-    for dimension in ("x", "y", "2d"):
+    for dimension in dimensions:
         _log_stage(f"Analyzing {dimension} trajectories and saving plots")
         estimates, sizes_path = pipeline.analyze_trajectories(
             trajectories,
@@ -505,6 +525,8 @@ def _run_analysis(parameter_file: Path | None = None, *, input_file: Path = INPU
         "compatibility": "NanoObjectDetection 1.0",
         "parameter_file": parameter_source,
         "processing_mode": processing_mode,
+        "background_stack_storage": background_stack_storage,
+        "analysis_dimensions": list(dimensions),
         "gpu_enabled": gpu_enabled,
         "chunk_frames": CHUNK_FRAMES,
         "chunk_overlap_frames": CHUNK_OVERLAP_FRAMES,
@@ -561,6 +583,15 @@ if __name__ == "__main__":
     parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
     parser.add_argument("--processing-mode", choices=("chunked", "single_stack"),
                         default=PROCESSING_MODE)
+    parser.add_argument(
+        "--background-stack-storage",
+        choices=("memory", "disk"),
+        default=BACKGROUND_STACK_STORAGE,
+        help="Store the uint16 background stack in RAM or a temporary disk-backed map.",
+    )
+    parser.add_argument("--dimension", choices=("all", *ANALYSIS_DIMENSIONS),
+                        default="all",
+                        help="Trajectory analysis dimension to calculate (default: all).")
     parser.add_argument("--gpu", action="store_true")
     args = parser.parse_args()
     print(json.dumps(run(
@@ -569,5 +600,7 @@ if __name__ == "__main__":
         output_dir=args.output_dir,
         processing_mode=args.processing_mode,
         gpu_enabled=args.gpu,
+        background_stack_storage=args.background_stack_storage,
+        dimension=args.dimension,
     ), indent=2))
     print(f"Execution time: {time.time() - start_time} seconds")

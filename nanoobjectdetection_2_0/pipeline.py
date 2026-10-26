@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
+import tempfile
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
+from typing import IO
 
 import pandas as pd
 import numpy as np
@@ -72,6 +75,7 @@ class AnalysisPipeline:
         self.effective_chunk_frames = config.chunk_frames
         self._stack: np.ndarray | None = None
         self._stack_first = 0
+        self._background_stack_file: IO[bytes] | None = None
         if config.gpu_enabled:
             if not gpu_available():
                 raise RuntimeError(
@@ -127,6 +131,12 @@ class AnalysisPipeline:
         )
 
     def localize(self) -> tuple[pd.DataFrame, Path]:
+        try:
+            return self._localize()
+        finally:
+            self._release_background_stack()
+
+    def _localize(self) -> tuple[pd.DataFrame, Path]:
         update("Step 2/4: Localizing particles block by block")
         detections: list[pd.DataFrame] = []
         scale_max = None
@@ -136,9 +146,12 @@ class AnalysisPipeline:
             scale_max = self._global_processed_max()
         self._calibrate_detection(scale_max)
         _, _, height, width = self._source_range_and_shape()
-        resident = self._stack is not None
+        stack = self._stack
+        resident = stack is not None
         total_blocks = (
-            -(-len(self._stack) // self._block_frames(height, width)) if resident else None
+            -(-len(stack) // self._block_frames(height, width))
+            if stack is not None
+            else None
         )
         workers = self.config.locate_workers
         workers = (os.cpu_count() or 1) if workers == 0 else workers
@@ -194,7 +207,6 @@ class AnalysisPipeline:
             del raw_block, processed, image_block
         if pool is not None:
             pool.shutdown()
-        self._stack = None
         if not detections:
             raise RuntimeError("No particles were localized in any image block")
         result = pd.concat(detections, ignore_index=True)
@@ -209,6 +221,18 @@ class AnalysisPipeline:
         path = self.config.output_dir / "detections.csv"
         result.to_csv(path, index=False)
         return result, path
+
+    def _release_background_stack(self) -> None:
+        stack = self._stack
+        background_stack_file = self._background_stack_file
+        self._stack = None
+        self._background_stack_file = None
+        try:
+            if isinstance(stack, np.memmap):
+                stack.flush()
+        finally:
+            if background_stack_file is not None:
+                background_stack_file.close()
 
     def _saturated_flags(self, raw_block: np.ndarray, found: pd.DataFrame) -> np.ndarray:
         """Flag detections whose 3x3 neighbourhood reaches the saturation value."""
@@ -374,15 +398,40 @@ class AnalysisPipeline:
         first, stop, height, width = self._source_range_and_shape()
         frames = stop - first
         needed = frames * height * width * 2
-        available = _available_memory_bytes()
-        if available is not None and needed > 0.8 * available:
-            raise MemoryError(
-                f"The exact 1.0 background needs the whole ROI stack in RAM "
-                f"({needed / 1e9:.1f} GB) but only {available / 1e9:.1f} GB is available. "
-                "Reduce the ROI or the frame range, or use "
-                "background_method='median' on a subset."
+        if self.config.background_stack_storage == "disk":
+            self.config.output_dir.mkdir(parents=True, exist_ok=True)
+            free_space = shutil.disk_usage(self.config.output_dir).free
+            if needed > free_space:
+                raise OSError(
+                    "Disk-backed background stack needs "
+                    f"{needed / 1e9:.1f} GB but only "
+                    f"{free_space / 1e9:.1f} GB is available in "
+                    f"{self.config.output_dir}."
+                )
+            self._background_stack_file = tempfile.NamedTemporaryFile(
+                mode="w+b",
+                prefix=".background-stack-",
+                suffix=".uint16",
+                dir=self.config.output_dir,
             )
-        stack = np.empty((frames, height, width), dtype=np.uint16)
+            self._background_stack_file.truncate(needed)
+            stack = np.memmap(
+                self._background_stack_file,
+                dtype=np.uint16,
+                mode="w+",
+                shape=(frames, height, width),
+            )
+        else:
+            available = _available_memory_bytes()
+            if available is not None and needed > 0.8 * available:
+                raise MemoryError(
+                    f"The exact 1.0 background needs the whole ROI stack in RAM "
+                    f"({needed / 1e9:.1f} GB) but only "
+                    f"{available / 1e9:.1f} GB is available. Use "
+                    "background_stack_storage='disk' or reduce the ROI or frame range."
+                )
+            stack = np.empty((frames, height, width), dtype=np.uint16)
+        self._stack = stack
         filled = 0
         for block_first, block in progress(
             self._iter_source_blocks(self._block_frames(height, width)),
@@ -398,7 +447,6 @@ class AnalysisPipeline:
                 filled += len(block)
         if filled != frames:
             raise RuntimeError(f"Expected {frames} frames but read {filled}")
-        self._stack = stack
         self._stack_first = first
         offset = float(stack.min())
         flat = stack.reshape(frames, height * width)

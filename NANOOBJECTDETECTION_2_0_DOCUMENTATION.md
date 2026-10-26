@@ -113,14 +113,14 @@ When static background removal is enabled, both modes calculate one exact
 legacy background image: for each pixel, sort its values over the entire
 selected stack and average the values from the 30th through the 70th
 percentiles. The same image is subtracted from all blocks. It is saved as
-`global_background.npy`. To preserve this whole-stack calculation without
-temporary duplicate stacks, 2.0 preallocates the selected ROI as a uint16
-array and reduces it in pixel strips. **This requires the complete selected
-ROI stack to fit in RAM even in chunked mode.** Chunking limits localization
-working blocks and keeps a disk-backed copy; it does not make this exact
-global background calculation bounded-memory. On Linux, when `/proc/meminfo` is available, the code checks available memory
-and raises an error when the estimated stack exceeds 80% of it. Reduce the
-ROI or frame range if needed. With static background removal disabled, input
+`global_background.npy`. The selected ROI is stored as a uint16 stack and
+reduced in pixel strips. By default, that stack is held in RAM. Set
+`--background-stack-storage disk` (or `BACKGROUND_STACK_STORAGE = "disk"` in
+`main.py`) to use a temporary disk-backed memory map instead. The disk-backed
+option runs the same exact calculation, requires free disk space approximately
+equal to the decoded ROI stack, may be slower, and removes its temporary file
+after localization. Chunked processing alone does not change where this
+background stack is stored. With static background removal disabled, input
 frames are streamed in processing blocks instead.
 
 ## 4. Version 1.0 parameter compatibility

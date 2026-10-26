@@ -65,6 +65,7 @@ class AnalysisConfig:
     stitch_distance_growth_px: float = 0.5
     stitch_max_mass_ratio: float = 3.0
     stitch_min_fragment_frames: int = 3
+    background_stack_storage: str = "memory"
     background_method: str = "legacy_trimmed_mean"
     intensity_normalization: str = "global"
     particle_diameter: int = 7
@@ -106,6 +107,10 @@ class AnalysisConfig:
             raise ValueError("chunk_overlap_frames must be in [0, chunk_frames)")
         if self.processing_mode not in {"chunked", "single_stack"}:
             raise ValueError("processing_mode must be 'chunked' or 'single_stack'")
+        if self.background_stack_storage not in {"memory", "disk"}:
+            raise ValueError(
+                "background_stack_storage must be 'memory' or 'disk'"
+            )
         if self.background_method not in {"median", "legacy_trimmed_mean"}:
             raise ValueError("background_method must be 'median' or 'legacy_trimmed_mean'")
         if self.intensity_normalization not in {"global", "block"}:

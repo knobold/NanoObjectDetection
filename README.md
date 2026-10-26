@@ -88,7 +88,9 @@ The same script can be run with options from PowerShell:
 python .\main.py `
   --input-file "C:\data\my_stack.tif" `
   --output-dir "C:\data\my_analysis" `
-  --processing-mode single_stack
+  --processing-mode single_stack `
+  --dimension 2d `
+  --background-stack-storage disk
 ```
 
 To use a legacy-format parameter file:
@@ -111,10 +113,18 @@ Available command-line options:
 |---|---|
 | `--processing-mode single_stack` | Read frames directly from the TIFF; this is the default. |
 | `--processing-mode chunked` | Store/process the selected stack in blocks, useful for large inputs. |
+| `--background-stack-storage memory` | Keep the exact uint16 stack used for background subtraction in RAM (default). |
+| `--background-stack-storage disk` | Use a temporary disk-backed uint16 stack; needs free space approximately equal to the decoded ROI stack. |
+| `--dimension all` | Analyze x, y, and 2d trajectories; this is the default. |
+| `--dimension x`, `--dimension y`, `--dimension 2d` | Calculate only the selected trajectory dimension. |
 | `--gpu` | Enable GPU preprocessing; requires compatible CuPy/CUDA installation. |
 | `--input-file PATH` | Select the TIFF stack to analyze. |
 | `--output-dir PATH` | Select where results are written. |
 | `--parameter-file PATH` | Load analysis settings from a legacy-format JSON file. |
+
+Disk-backed background storage preserves the exact background calculation and
+removes its temporary stack file after localization. It can use more disk I/O
+and run more slowly than keeping the stack in RAM.
 
 Chunking reduces localization working-block size, but does not make the exact
 stack-wide static-background calculation bounded-memory. When that
