@@ -8,9 +8,12 @@
 from __future__ import annotations
 
 import argparse
+import ctypes
+import ctypes.wintypes
 from copy import deepcopy
 from dataclasses import asdict, replace
 import json
+import platform
 try:
     import resource
 except ImportError:
@@ -248,6 +251,10 @@ PARAMETERS = {
 
 
 def _memory_stats() -> tuple[float | None, float | None, float | None]:
+    if platform.system() == "Windows":
+        total, available, rss, _ = _windows_memory_stats()
+        return total, available, rss
+
     meminfo = Path("/proc/meminfo")
     status = Path("/proc/self/status")
     if not meminfo.exists() or not status.exists():
@@ -268,6 +275,72 @@ def _memory_stats() -> tuple[float | None, float | None, float | None]:
     return values.get("MemTotal"), values.get("MemAvailable"), rss
 
 
+def _windows_memory_stats() -> tuple[float, float, float, float]:
+    class MemoryStatusEx(ctypes.Structure):
+        _fields_ = [
+            ("dwLength", ctypes.wintypes.DWORD),
+            ("dwMemoryLoad", ctypes.wintypes.DWORD),
+            ("ullTotalPhys", ctypes.c_ulonglong),
+            ("ullAvailPhys", ctypes.c_ulonglong),
+            ("ullTotalPageFile", ctypes.c_ulonglong),
+            ("ullAvailPageFile", ctypes.c_ulonglong),
+            ("ullTotalVirtual", ctypes.c_ulonglong),
+            ("ullAvailVirtual", ctypes.c_ulonglong),
+            ("ullAvailExtendedVirtual", ctypes.c_ulonglong),
+        ]
+
+    class ProcessMemoryCounters(ctypes.Structure):
+        _fields_ = [
+            ("cb", ctypes.wintypes.DWORD),
+            ("PageFaultCount", ctypes.wintypes.DWORD),
+            ("PeakWorkingSetSize", ctypes.c_size_t),
+            ("WorkingSetSize", ctypes.c_size_t),
+            ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+            ("PagefileUsage", ctypes.c_size_t),
+            ("PeakPagefileUsage", ctypes.c_size_t),
+        ]
+
+    memory_status = MemoryStatusEx()
+    memory_status.dwLength = ctypes.sizeof(MemoryStatusEx)
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    global_memory_status_ex = kernel32.GlobalMemoryStatusEx
+    global_memory_status_ex.argtypes = [ctypes.POINTER(MemoryStatusEx)]
+    global_memory_status_ex.restype = ctypes.wintypes.BOOL
+    if not global_memory_status_ex(ctypes.byref(memory_status)):
+        raise ctypes.WinError(ctypes.get_last_error())
+
+    counters = ProcessMemoryCounters()
+    counters.cb = ctypes.sizeof(ProcessMemoryCounters)
+    get_current_process = kernel32.GetCurrentProcess
+    get_current_process.argtypes = []
+    get_current_process.restype = ctypes.c_void_p
+    psapi = ctypes.WinDLL("psapi", use_last_error=True)
+    get_process_memory_info = psapi.GetProcessMemoryInfo
+    get_process_memory_info.argtypes = [
+        ctypes.c_void_p,
+        ctypes.POINTER(ProcessMemoryCounters),
+        ctypes.wintypes.DWORD,
+    ]
+    get_process_memory_info.restype = ctypes.wintypes.BOOL
+    if not get_process_memory_info(
+        get_current_process(),
+        ctypes.byref(counters),
+        counters.cb,
+    ):
+        raise ctypes.WinError(ctypes.get_last_error())
+
+    gib = 1024**3
+    return (
+        memory_status.ullTotalPhys / gib,
+        memory_status.ullAvailPhys / gib,
+        counters.WorkingSetSize / gib,
+        counters.PeakWorkingSetSize / gib,
+    )
+
+
 def _memory_report() -> str:
     total, available, rss = _memory_stats()
     if total is None or available is None:
@@ -284,9 +357,15 @@ def _log_stage(stage: str) -> None:
 
 
 def _peak_rss_gib() -> float | None:
+    if platform.system() == "Windows":
+        return _windows_memory_stats()[3]
     if resource is None:
         return None
-    return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024**2
+    getrusage = getattr(resource, "getrusage", None)
+    rusage_self = getattr(resource, "RUSAGE_SELF", None)
+    if getrusage is None or rusage_self is None:
+        return None
+    return getrusage(rusage_self).ru_maxrss / 1024**2
 
 
 def _watch_memory(stop: threading.Event, min_available_gb: float = 1.0) -> None:
@@ -297,8 +376,8 @@ def _watch_memory(stop: threading.Event, min_available_gb: float = 1.0) -> None:
             print(
                 "[LOW MEMORY] "
                 f"{_memory_report()} If the process disappears abruptly, it may "
-                "have been terminated by the OS out-of-memory killer; inspect "
-                "the system log (for example, `dmesg | grep -i oom`).",
+                "have been terminated by the operating system's out-of-memory "
+                "handling; check the system logs for details.",
                 flush=True,
             )
             warned = True
