@@ -33,6 +33,29 @@ def tiff_info(path: Path) -> dict[str, Any]:
         }
 
 
+def to_processing_bit_depth(
+    frames: np.ndarray, processing_bit_depth: int
+) -> np.ndarray:
+    """Convert unsigned TIFF frames to the selected processing bit depth."""
+    if processing_bit_depth == 16:
+        return frames
+    if processing_bit_depth != 8:
+        raise ValueError("processing_bit_depth must be 8 or 16")
+
+    data = np.asarray(frames)
+    if data.dtype.kind != "u":
+        raise ValueError(
+            "8-bit processing requires an unsigned 8-bit or 16-bit TIFF stack"
+        )
+    if data.dtype.itemsize == 1:
+        return data
+    if data.dtype.itemsize == 2:
+        return np.right_shift(data, 8).astype(np.uint8)
+    raise ValueError(
+        "8-bit processing requires an unsigned 8-bit or 16-bit TIFF stack"
+    )
+
+
 def read_frames(path: Path, first: int, stop: int) -> np.ndarray:
     tifffile = _tifffile()
     try:
@@ -77,6 +100,7 @@ def create_store(
     chunk_overlap_frames: int,
     y_slice: slice,
     x_slice: slice,
+    processing_bit_depth: int = 16,
 ) -> dict[str, Any]:
     """Create a reproducible chunk store without changing the source."""
     info = tiff_info(source)
@@ -92,7 +116,12 @@ def create_store(
         "format": "nanoobjectdetection-2.0-chunks-v1",
         "source": str(source.resolve()),
         "axes": info["axes"],
-        "dtype": info["dtype"],
+        "source_dtype": info["dtype"],
+        "dtype": (
+            "uint8"
+            if processing_bit_depth == 8 and np.dtype(info["dtype"]).itemsize == 2
+            else info["dtype"]
+        ),
         "frame_start": frame_start,
         "frame_stop": stop,
         "chunk_frames": chunk_frames,
@@ -114,6 +143,7 @@ def create_store(
         last = min(first + chunk_frames, stop)
         data = read_frames(source, first, last)
         data = data[:, y_slice, x_slice]
+        data = to_processing_bit_depth(data, processing_bit_depth)
         if manifest["shape"] is None:
             manifest["shape"] = [stop - frame_start, data.shape[1], data.shape[2]]
         name = f"chunk_{chunk_number:06d}.tif"

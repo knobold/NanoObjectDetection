@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nanoobjectdetection"
+version = "2.0.0"
+description = "Particle localization and diffusion analysis for TIFF image stacks"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "pandas",
+    "scipy",
+    "tifffile",
+    "trackpy",
+    "tqdm",
+    "matplotlib",
+    "numba",
+]
+
+[project.optional-dependencies]
+gpu = ["cupy-cuda12x"]
+
+[project.scripts]
+nanoobjectdetection = "main:cli"
+nanoobjectdetection-example = "example:main"
+
+[tool.setuptools]
+py-modules = ["main", "example"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nanoobjectdetection_2_0*"]

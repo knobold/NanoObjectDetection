@@ -66,6 +66,7 @@ class AnalysisConfig:
     stitch_max_mass_ratio: float = 3.0
     stitch_min_fragment_frames: int = 3
     background_stack_storage: str = "memory"
+    processing_bit_depth: int = 16
     background_method: str = "legacy_trimmed_mean"
     intensity_normalization: str = "global"
     particle_diameter: int = 7
@@ -111,6 +112,8 @@ class AnalysisConfig:
             raise ValueError(
                 "background_stack_storage must be 'memory' or 'disk'"
             )
+        if self.processing_bit_depth not in {8, 16}:
+            raise ValueError("processing_bit_depth must be 8 or 16")
         if self.background_method not in {"median", "legacy_trimmed_mean"}:
             raise ValueError("background_method must be 'median' or 'legacy_trimmed_mean'")
         if self.intensity_normalization not in {"global", "block"}:

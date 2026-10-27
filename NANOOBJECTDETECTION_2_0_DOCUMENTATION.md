@@ -20,20 +20,33 @@ not a different tracking algorithm.
 
 ## 2. Quick start
 
-Install CPU dependencies:
+Install the package and its CPU dependencies from the repository folder:
 
 ```bash
-/path/to/python -m pip install -r /path/to/NanoObjectDetection/requirements-2.0.txt
+/path/to/python -m pip install /path/to/NanoObjectDetection
 ```
 
-Run using the parameter values embedded in `main.py`:
+The installation provides a `nanoobjectdetection` command that can run from
+any working directory. For experimental data, supply the parameter JSON and
+input/output paths; this does not require editing `main.py`:
+
+```bash
+nanoobjectdetection \
+  --parameter-file /path/to/parameter.json \
+  --input-file /path/to/stack.tif \
+  --output-dir /path/to/analysis
+```
+
+Every completed run writes the effective legacy and 2.0 settings to
+`OUTPUT_DIR/parameters.json`. `nanoobjectdetection --help` lists all available
+options.
+
+To analyze the included example directly from a source checkout using the
+default settings:
 
 ```bash
 /path/to/python /path/to/NanoObjectDetection/main.py
 ```
-
-Every completed run writes the effective legacy and 2.0 settings to
-`OUTPUT_DIR/parameters.json`.
 
 Run with a legacy-format parameter JSON in chunked CPU mode:
 
@@ -103,25 +116,43 @@ The 2.0 workflow follows the same conceptual order as 1.0:
 16. Write 2.0 tables and 1.0-compatible aliases.
 17. Create legacy-style plots and export plot data.
 
-Chunked mode writes the selected source frames and ROI to `image_store/`,
-then localizes blocks with overlap if configured. Single-stack mode reads
-source TIFF frames directly and does not create that chunk store. In both
-modes, detections are combined before tracking and drift estimation; tracks
-and drift are not estimated independently per block.
+Chunked mode writes the selected source frames and ROI to a unique temporary
+directory inside the output folder, then localizes blocks with overlap if
+configured. The generated TIFF chunks and their manifest are removed after
+localization completes, including when localization fails. Single-stack mode
+reads source TIFF frames directly and does not create that chunk store. In
+both modes, detections are combined before tracking and drift estimation;
+tracks and drift are not estimated independently per block.
 
-When static background removal is enabled, both modes calculate one exact
-legacy background image: for each pixel, sort its values over the entire
-selected stack and average the values from the 30th through the 70th
-percentiles. The same image is subtracted from all blocks. It is saved as
-`global_background.npy`. The selected ROI is stored as a uint16 stack and
-reduced in pixel strips. By default, that stack is held in RAM. Set
+When static background removal is enabled, both modes calculate one global
+background image: for each pixel, sort its values over the entire selected
+stack and average the values from the 30th through the 70th percentiles. With
+the default 16-bit mode this matches the legacy calculation on the input
+values; with 8-bit mode it runs on the quantized values. The same background
+image is subtracted from all blocks and saved as `global_background.npy`. By
+default, the selected ROI is stored as a uint16 stack and reduced in pixel
+strips. Set
 `--background-stack-storage disk` (or `BACKGROUND_STACK_STORAGE = "disk"` in
 `main.py`) to use a temporary disk-backed memory map instead. The disk-backed
-option runs the same exact calculation, requires free disk space approximately
-equal to the decoded ROI stack, may be slower, and removes its temporary file
-after localization. Chunked processing alone does not change where this
-background stack is stored. With static background removal disabled, input
-frames are streamed in processing blocks instead.
+option runs the same calculation as RAM storage at the selected bit depth,
+requires free disk space approximately equal to the selected-depth ROI stack,
+may be slower, and removes its temporary file after localization. Chunked
+processing alone does not change where this background stack is stored. With
+static background removal disabled, input frames are streamed in processing
+blocks instead.
+
+Set `--background-stack-storage memory` to keep that stack in RAM (the
+default). The default processing bit depth is 16, preserving the input
+precision. The optional `--processing-bit-depth 8` mode converts uint16 pixel values to
+uint8 by shifting right eight bits (`value >> 8`); uint8 TIFF values are left
+unchanged. This quantizes the input and may change background estimates,
+saturation flags, and particle detections. When a saturation threshold is set
+for a uint16 source, it is shifted to the corresponding uint8 bin; this
+approximation can flag values near the threshold differently. The
+raw/background stack then uses half as much memory or disk space, while float32
+processing arrays remain unchanged, so total process memory savings are
+smaller than 50%. Choose 8-bit mode only when losing the lower eight bits is
+acceptable for the experiment.
 
 ## 4. Version 1.0 parameter compatibility
 
@@ -400,9 +431,10 @@ numerical scaling can differ. Compare detection counts, trajectory lengths,
 drift, and diameter distributions when changing block size or overlap.
 
 Both modes localize in processing blocks. `single_stack` reads the TIFF
-directly, while `chunked` also stores chunk files on disk. When exact
-stack-wide background subtraction is enabled, both modes retain the complete
-selected ROI in RAM as described above. Choose the mode based on storage and
+directly, while `chunked` temporarily stores chunk files on disk and removes
+them after localization. When exact stack-wide background subtraction is
+enabled, both modes retain the complete selected ROI in RAM or in the selected
+disk-backed map as described above. Choose the mode based on storage and
 localization needs, not on the assumption that chunking removes this memory
 requirement.
 

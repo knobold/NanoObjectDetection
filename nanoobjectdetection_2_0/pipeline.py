@@ -16,7 +16,13 @@ import numpy as np
 from .config import AnalysisConfig
 from .localization import locate
 from .preprocessing import preprocess, to_uint16
-from .storage import create_store, iter_blocks, iter_tiff_frames, tiff_info
+from .storage import (
+    create_store,
+    iter_blocks,
+    iter_tiff_frames,
+    tiff_info,
+    to_processing_bit_depth,
+)
 from .tracking import link, remove_near_stationary
 from .trajectory_processing import (
     filter_minimum_frames,
@@ -67,7 +73,8 @@ class AnalysisPipeline:
     def __init__(self, config: AnalysisConfig):
         config.validate()
         self.config = config
-        self.store = config.output_dir / "image_store"
+        self.store: Path | None = None
+        self._temporary_store = False
         self.channel_center_y_px = config.channel_center_y_px
         self.plot_paths: dict[str, str] = {}
         self.global_background: np.ndarray | None = None
@@ -76,13 +83,14 @@ class AnalysisPipeline:
         self._stack: np.ndarray | None = None
         self._stack_first = 0
         self._background_stack_file: IO[bytes] | None = None
+        info = tiff_info(config.input_file)
+        self.source_pixel_dtype = np.dtype(info["dtype"])
         if config.gpu_enabled:
             if not gpu_available():
                 raise RuntimeError(
                     "GPU acceleration was requested, but CuPy/CUDA is unavailable. "
                     "Install a CUDA-compatible CuPy package or set gpu_enabled=False."
                 )
-            info = tiff_info(config.input_file)
             height, width = info["shape"][-2:]
             self.effective_chunk_frames = choose_chunk_frames(
                 config.chunk_frames,
@@ -112,6 +120,7 @@ class AnalysisPipeline:
 
     def prepare_store(self) -> dict:
         update("Step 1/4: Preparing TIFF working store")
+        self.cleanup_store()
         self.config.output_dir.mkdir(parents=True, exist_ok=True)
         if self.config.processing_mode == "single_stack":
             return {
@@ -119,22 +128,48 @@ class AnalysisPipeline:
                 "shape": list(tiff_info(self.config.input_file)["shape"]),
                 "chunks": [],
             }
-        return create_store(
-            self.config.input_file,
-            self.store,
-            self.config.frame_start,
-            self.config.frame_stop,
-            self.effective_chunk_frames,
-            self.config.chunk_overlap_frames,
-            self.config.roi.y_slice,
-            self.config.roi.x_slice,
+        self.store = Path(
+            tempfile.mkdtemp(
+                prefix=".nanoobjectdetection-image-store-",
+                dir=self.config.output_dir,
+            )
         )
+        self._temporary_store = True
+        created = False
+        try:
+            manifest = create_store(
+                self.config.input_file,
+                self.store,
+                self.config.frame_start,
+                self.config.frame_stop,
+                self.effective_chunk_frames,
+                self.config.chunk_overlap_frames,
+                self.config.roi.y_slice,
+                self.config.roi.x_slice,
+                self.config.processing_bit_depth,
+            )
+            created = True
+            return manifest
+        finally:
+            if not created:
+                self.cleanup_store()
 
     def localize(self) -> tuple[pd.DataFrame, Path]:
         try:
             return self._localize()
         finally:
-            self._release_background_stack()
+            try:
+                self._release_background_stack()
+            finally:
+                self.cleanup_store()
+
+    def cleanup_store(self) -> None:
+        store = self.store
+        if not self._temporary_store or store is None:
+            return
+        self._temporary_store = False
+        self.store = None
+        shutil.rmtree(store)
 
     def _localize(self) -> tuple[pd.DataFrame, Path]:
         update("Step 2/4: Localizing particles block by block")
@@ -239,6 +274,12 @@ class AnalysisPipeline:
         limit = self.config.saturated_pixel_value
         if limit is None:
             return np.zeros(len(found), dtype=bool)
+        if (
+            self.config.processing_bit_depth == 8
+            and self.source_pixel_dtype.kind == "u"
+            and self.source_pixel_dtype.itemsize == 2
+        ):
+            limit = np.floor(limit / 256)
         flags = np.zeros(len(found), dtype=bool)
         height, width = raw_block.shape[1:]
         for index, (frame, x, y) in enumerate(
@@ -347,14 +388,16 @@ class AnalysisPipeline:
             height = len(range(*self.config.roi.y_slice.indices(height)))
             width = len(range(*self.config.roi.x_slice.indices(width)))
             return self.config.frame_start, stop, height, width
-        manifest = json.loads((self.store / "manifest.json").read_text(encoding="utf-8"))
+        manifest = json.loads(
+            (self._require_store() / "manifest.json").read_text(encoding="utf-8")
+        )
         _, height, width = manifest["shape"]
         return int(manifest["frame_start"]), int(manifest["frame_stop"]), height, width
 
     def _iter_source_blocks(self, batch_frames: int):
         """Yield (first frame, ROI-cropped block) by reading the source exactly once."""
         if self.config.processing_mode != "single_stack":
-            yield from iter_blocks(self.store)
+            yield from iter_blocks(self._require_store())
             return
         frames: list[np.ndarray] = []
         first_frame = self.config.frame_start
@@ -364,7 +407,12 @@ class AnalysisPipeline:
         ):
             if not frames:
                 first_frame = frame_number
-            frames.append(image[roi.y_slice, roi.x_slice])
+            frames.append(
+                to_processing_bit_depth(
+                    image[roi.y_slice, roi.x_slice],
+                    self.config.processing_bit_depth,
+                )
+            )
             if len(frames) == batch_frames:
                 yield first_frame, np.stack(frames, axis=0)
                 frames = []
@@ -374,7 +422,8 @@ class AnalysisPipeline:
     def _block_frames(self, height: int, width: int) -> int:
         """Frames per processing block: bounded in memory, large enough to feed all workers."""
         workers = self.config.locate_workers or (os.cpu_count() or 1)
-        by_memory = max(1, int(128e6 // (height * width * 2)))
+        bytes_per_pixel = self.config.processing_bit_depth // 8
+        by_memory = max(1, int(128e6 // (height * width * bytes_per_pixel)))
         frames = min(self.effective_chunk_frames, by_memory)
         return max(frames, workers * 4 if workers > 1 else 1)
 
@@ -388,16 +437,24 @@ class AnalysisPipeline:
             return
         yield from self._iter_source_blocks(size)
 
+    def _require_store(self) -> Path:
+        if self.store is None:
+            raise RuntimeError("The chunk store has not been prepared")
+        return self.store
+
     def _global_background(self) -> np.ndarray:
         """Estimate the 1.0 background: per-pixel 30-70% mean over all frames.
 
-        The ROI stack is read once into a preallocated array in its native integer
-        dtype, kept for the later passes, and reduced in pixel strips, so the
-        result is identical to the 1.0 calculation.
+        The ROI stack is read once into a preallocated array at the selected
+        processing bit depth, kept for later passes, and reduced in pixel
+        strips.
         """
         first, stop, height, width = self._source_range_and_shape()
         frames = stop - first
-        needed = frames * height * width * 2
+        stack_dtype = (
+            np.uint8 if self.config.processing_bit_depth == 8 else np.uint16
+        )
+        needed = frames * height * width * np.dtype(stack_dtype).itemsize
         if self.config.background_stack_storage == "disk":
             self.config.output_dir.mkdir(parents=True, exist_ok=True)
             free_space = shutil.disk_usage(self.config.output_dir).free
@@ -411,13 +468,13 @@ class AnalysisPipeline:
             self._background_stack_file = tempfile.NamedTemporaryFile(
                 mode="w+b",
                 prefix=".background-stack-",
-                suffix=".uint16",
+                suffix=f".{np.dtype(stack_dtype).name}",
                 dir=self.config.output_dir,
             )
             self._background_stack_file.truncate(needed)
             stack = np.memmap(
                 self._background_stack_file,
-                dtype=np.uint16,
+                dtype=stack_dtype,
                 mode="w+",
                 shape=(frames, height, width),
             )
@@ -430,7 +487,7 @@ class AnalysisPipeline:
                     f"{available / 1e9:.1f} GB is available. Use "
                     "background_stack_storage='disk' or reduce the ROI or frame range."
                 )
-            stack = np.empty((frames, height, width), dtype=np.uint16)
+            stack = np.empty((frames, height, width), dtype=stack_dtype)
         self._stack = stack
         filled = 0
         for block_first, block in progress(
@@ -810,6 +867,8 @@ class AnalysisPipeline:
             "tiff": tiff_info(self.config.input_file),
             "chunked_shape": tuple(manifest["shape"]),
             "chunk_count": len(manifest["chunks"]),
-            "chunk_store": str(self.store.resolve()),
+            "chunk_store": (
+                str(self.store.resolve()) if self.store is not None else None
+            ),
             "channel_center_y_px": center,
         }

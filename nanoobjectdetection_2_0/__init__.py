@@ -1,5 +1,6 @@
 """NanoObjectDetection 2.0: 1.0-compatible chunked/GPU pipeline."""
 
+from .application import run
 from .config import AnalysisConfig
 from .pipeline import AnalysisPipeline
 from .drift import correct_global
@@ -17,4 +18,5 @@ __all__ = [
     "estimate_diffusion",
     "hindrance_factor",
     "local_channel_diameter_nm",
+    "run",
 ]

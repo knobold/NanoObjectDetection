@@ -6,21 +6,23 @@ and hydrodynamic diameter, and exports analysis tables and plots. Version 2.0
 keeps compatibility with the 1.0 parameter format and adds blockwise
 processing and optional CUDA acceleration.
 
-The original 1.0 package is still included in [`nanoobjectdetection_1_0/`](./nanoobjectdetection_1_0/).
-For full parameter descriptions, scientific methods, compatibility details,
-limitations, and output-file definitions, see the
+The source checkout also contains the original 1.0 implementation in
+[`nanoobjectdetection_1_0/`](./nanoobjectdetection_1_0/); the installable
+distribution packages the 2.0 pipeline. For full parameter descriptions,
+scientific methods, compatibility details, limitations, and output-file
+definitions, see the
 [2.0 documentation](./NANOOBJECTDETECTION_2_0_DOCUMENTATION.md).
 
 ## Installation
 
-Use Python with a virtual environment. From the repository folder, run these
-commands in PowerShell:
+Use Python with a virtual environment. From the repository folder, install the
+package and its dependencies in PowerShell:
 
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-python -m pip install -r requirements-2.0.txt
+python -m pip install .
 ```
 
 On macOS or Linux, create and activate the environment with:
@@ -29,17 +31,46 @@ On macOS or Linux, create and activate the environment with:
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -r requirements-2.0.txt
+python -m pip install .
 ```
+
+The installation adds the `nanoobjectdetection` command. It can be run from
+any working directory and does not require editing `main.py`. To install an
+editable development copy instead, use `python -m pip install -e .` from the
+repository folder.
+
+### Python example
+
+After installing the package, run the included `example.py` from any directory.
+Use absolute paths, or paths relative to the directory where you run the
+command:
+
+```powershell
+python "D:\Python\NanoObjectDetection\example.py" `
+  --input-file "C:\data\my_stack.tif" `
+  --output-dir "C:\data\my_analysis" `
+  --background-stack-storage disk `
+  --processing-bit-depth 8 `
+  --dimension all
+```
+
+The script imports `run` from the installed `nanoobjectdetection_2_0`
+package, so it does not import `main.py` or depend on the example script being
+located beside the package.
+Its `PARAMETERS` dictionary and processing settings near the top of
+`example.py` expose the analysis configuration for editing. Omit
+`--parameter-file` to use those settings; optionally add
+`--parameter-file "C:\data\parameter.json"` to use a legacy JSON instead.
+Input/output paths can be set in the script or passed as options.
+Run `python "D:\Python\NanoObjectDetection\example.py" --help` for options.
 
 ### Optional GPU preprocessing
 
 GPU mode requires a supported NVIDIA GPU, a compatible CUDA runtime, and the
-matching CuPy package. For CUDA 12.x, the repository's optional requirements
-file installs `cupy-cuda12x`:
+matching CuPy package. For CUDA 12.x, install the package's GPU extra:
 
 ```bash
-python -m pip install -r requirements-gpu.txt
+python -m pip install ".[gpu]"
 ```
 
 If your CUDA version differs, install the CuPy package matching your CUDA
@@ -47,42 +78,43 @@ runtime instead. The pipeline reports an error if GPU mode is requested but a
 usable CUDA device is unavailable. Trackpy localization, linking, and MSD
 fitting remain CPU operations.
 
-## Run from an IDE (recommended)
+## Run from an IDE
 
-The default settings in `main.py` point to the included example TIFF. You can
-run that file directly from VS Code, PyCharm, or another Python IDE:
+The source `main.py` defaults to the included example TIFF and can be run
+directly from VS Code, PyCharm, or another Python IDE:
 
 1. Open the repository folder in your IDE.
 2. Select the Python interpreter from the `.venv` environment created above.
    In VS Code, use **Python: Select Interpreter**; in PyCharm, select the
    project interpreter in the Python interpreter settings.
-3. Open `main.py` and review the settings near the top of the file. For your
-   own experiment, update `INPUT_FILE`, `OUTPUT_DIR`, and the experiment and
-   analysis settings in `main.py`. The input and output paths can be absolute
-   paths or paths built from `ROOT`.
-4. Run `main.py` with the IDE's **Run Python File** or **Run** action. The
-   default example stack will run without command-line arguments.
+3. Run `main.py` with the IDE's **Run Python File** or **Run** action to
+   analyze the included example.
 
-To load a legacy-format JSON instead of the in-code `PARAMETERS`, set
-`LEGACY_PARAMETER_FILE` in `main.py`, for example:
-
-```python
-LEGACY_PARAMETER_FILE = ROOT / "example" / "parameter.json"
-```
-
-Then update the input/output paths as needed and run `main.py`. To use
-chunked processing or GPU preprocessing from an IDE, add the relevant
-arguments to that IDE's run configuration; for example, use
-`--processing-mode chunked` or `--gpu`. Select the same `.venv` interpreter
-for the run configuration so the installed dependencies are available.
-
-Before analyzing experimental data, review the camera calibration,
-acquisition rate, temperature, viscosity, channel dimensions, ROI, and
-Trackpy settings in `main.py` or the selected parameter file.
+For your own data, use the installed command with a parameter JSON rather than
+editing `main.py`. Review camera calibration, acquisition rate, temperature,
+viscosity, channel dimensions, ROI, and Trackpy settings in that JSON.
 
 ## Run from a terminal
 
-The same script can be run with options from PowerShell:
+Run an installed analysis from any folder in PowerShell:
+
+```powershell
+nanoobjectdetection `
+  --parameter-file "C:\data\parameter.json" `
+  --input-file "C:\data\my_stack.tif" `
+  --output-dir "C:\data\my_analysis" `
+  --processing-mode single_stack `
+  --background-stack-storage disk `
+  --processing-bit-depth 8
+```
+
+To install the package from another folder or drive, use its repository path:
+
+```powershell
+python -m pip install "D:\Python\NanoObjectDetection"
+```
+
+The source script can also be run with options from the repository folder:
 
 ```powershell
 python .\main.py `
@@ -113,8 +145,10 @@ Available command-line options:
 |---|---|
 | `--processing-mode single_stack` | Read frames directly from the TIFF; this is the default. |
 | `--processing-mode chunked` | Store/process the selected stack in blocks, useful for large inputs. |
-| `--background-stack-storage memory` | Keep the exact uint16 stack used for background subtraction in RAM (default). |
-| `--background-stack-storage disk` | Use a temporary disk-backed uint16 stack; needs free space approximately equal to the decoded ROI stack. |
+| `--background-stack-storage memory` | Keep the background stack used for subtraction in RAM (default). |
+| `--background-stack-storage disk` | Use a temporary disk-backed stack; needs free space approximately equal to the selected-depth ROI stack. |
+| `--processing-bit-depth 16` | Preserve the input pixel values (default). |
+| `--processing-bit-depth 8` | For uint16 input, keep the high 8 bits (`value >> 8`) for stored/raw processing data; halves raw/background stack storage but discards low-bit precision. |
 | `--dimension all` | Analyze x, y, and 2d trajectories; this is the default. |
 | `--dimension x`, `--dimension y`, `--dimension 2d` | Calculate only the selected trajectory dimension. |
 | `--gpu` | Enable GPU preprocessing; requires compatible CuPy/CUDA installation. |
@@ -122,9 +156,17 @@ Available command-line options:
 | `--output-dir PATH` | Select where results are written. |
 | `--parameter-file PATH` | Load analysis settings from a legacy-format JSON file. |
 
-Disk-backed background storage preserves the exact background calculation and
-removes its temporary stack file after localization. It can use more disk I/O
-and run more slowly than keeping the stack in RAM.
+Disk-backed background storage preserves the same calculation as memory
+storage at the selected bit depth and removes its temporary stack file after
+localization. It can use more disk I/O and run more slowly than keeping the
+stack in RAM.
+
+8-bit processing is opt-in and quantizes uint16 values by shifting right eight
+bits; it is not equivalent to the default 16-bit analysis and can change
+background subtraction and particle detections. It reduces raw and background
+stack storage by about half, but not total process memory because processing
+also uses float32 working arrays. For uint8 TIFF input, this option leaves the
+pixel values unchanged.
 
 Chunking reduces localization working-block size, but does not make the exact
 stack-wide static-background calculation bounded-memory. When that

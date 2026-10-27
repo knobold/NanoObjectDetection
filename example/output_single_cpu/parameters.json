@@ -59,10 +59,10 @@
   },
   "Find": {
     "tp_diameter": 7,
+    "tp_minmass": 358.0,
     "SaturatedPixelValue": "No Saturation",
     "tp_separation": 20,
-    "tp_percentile": 20,
-    "tp_minmass": 358.0
+    "tp_percentile": 20
   },
   "Link": {
     "Dark time": 1,
@@ -163,7 +163,7 @@
     "output_dir": "C:\\Users\\stecheltim\\OneDrive\\IPHT\\Python\\NanoObjectDetection\\example\\output_single_cpu",
     "frame_start": 0,
     "frame_stop": 6000,
-    "chunk_frames": 1833,
+    "chunk_frames": 916,
     "chunk_overlap_frames": 20,
     "processing_mode": "single_stack",
     "gpu_enabled": false,
@@ -203,6 +203,8 @@
     "stitch_distance_growth_px": 0.5,
     "stitch_max_mass_ratio": 3.0,
     "stitch_min_fragment_frames": 3,
+    "background_stack_storage": "memory",
+    "processing_bit_depth": 8,
     "background_method": "legacy_trimmed_mean",
     "intensity_normalization": "global",
     "particle_diameter": 7,
