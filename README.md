@@ -27,6 +27,7 @@ definitions, see the
 - Mean-squared displacement analysis, diffusion estimation, and
   Stokes-Einstein hydrodynamic diameter calculations.
 - Optional channel hindrance correction, including position-aware correction.
+- Single Particle Tracking using stitched Trajectories
 - RAM saving options: Single-stack and chunked execution modes, plus optional CUDA preprocessing, Optional Conversion of pixels to 8bit depth, 16bit is probably overkill.
 - CSV tables, compatibility output names, run configuration, and plots.
 
