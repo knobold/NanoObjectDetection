@@ -13,6 +13,30 @@ scientific methods, compatibility details, limitations, and output-file
 definitions, see the
 [2.0 documentation](./NANOOBJECTDETECTION_2_0_DOCUMENTATION.md).
 
+## Features
+
+- TIFF stack input with spatial and frame-range ROI selection.
+- Camera-offset, laser-fluctuation, static-background, and optional SNR
+  preprocessing.
+- Trackpy particle localization and trajectory linking, including optional
+  stitching for repeatedly lost single-particle detections.
+- Fixed-particle filtering, trajectory quality checks, and global drift
+  correction.
+- Mean-squared displacement analysis, diffusion estimation, and
+  Stokes-Einstein hydrodynamic diameter calculations.
+- Optional channel hindrance correction, including position-aware correction.
+- Single-stack and chunked execution modes, plus optional CUDA preprocessing.
+- CSV tables, compatibility output names, run configuration, and plots.
+
+## New Features
+
+- Try to implement them on your own! AI is powerful and easy too use. You can then try to submit a merge request here.
+
+## Issues
+
+- 1st Try to solve the issue yourself with AI
+-> if its a bug caused by this repo, not your local installation open an Issue or write me a detailed  Bug report on Slack. Paste console logs or anything that helps me solve your issue.
+
 ## Installation
 
 Use Python with a virtual environment. From the repository folder, install the
@@ -55,8 +79,7 @@ python "D:\Python\NanoObjectDetection\example.py" `
 ```
 
 The script imports `run` from the installed `nanoobjectdetection_2_0`
-package, so it does not import `main.py` or depend on the example script being
-located beside the package.
+package.
 Its `PARAMETERS` dictionary and processing settings near the top of
 `example.py` expose the analysis configuration for editing. Omit
 `--parameter-file` to use those settings; optionally add
@@ -173,20 +196,7 @@ stack-wide static-background calculation bounded-memory. When that
 preprocessing option is enabled, the selected ROI stack must fit in RAM even
 in chunked mode. Reduce the ROI or frame range if memory is insufficient.
 
-## Features
 
-- TIFF stack input with spatial and frame-range ROI selection.
-- Camera-offset, laser-fluctuation, static-background, and optional SNR
-  preprocessing.
-- Trackpy particle localization and trajectory linking, including optional
-  stitching for repeatedly lost single-particle detections.
-- Fixed-particle filtering, trajectory quality checks, and global drift
-  correction.
-- Mean-squared displacement analysis, diffusion estimation, and
-  Stokes-Einstein hydrodynamic diameter calculations.
-- Optional channel hindrance correction, including position-aware correction.
-- Single-stack and chunked execution modes, plus optional CUDA preprocessing.
-- CSV tables, compatibility output names, run configuration, and plots.
 
 See the [2.0 documentation](./NANOOBJECTDETECTION_2_0_DOCUMENTATION.md) for
 the complete list of supported settings, generated files, assumptions, and
