@@ -1,5 +1,7 @@
 # NanoObjectDetection 2.0
 
+This is a new Version of Ronny Foersters Package. The old Package had lots of issues with type safety and RAM usage. This new implementation aims to improve RAM usage and enable us to easily develop new features.
+
 NanoObjectDetection analyzes TIFF image stacks of diffusing particles. It
 localizes particles, links detections into trajectories, estimates diffusion
 and hydrodynamic diameter, and exports analysis tables and plots. Version 2.0
@@ -25,7 +27,7 @@ definitions, see the
 - Mean-squared displacement analysis, diffusion estimation, and
   Stokes-Einstein hydrodynamic diameter calculations.
 - Optional channel hindrance correction, including position-aware correction.
-- Single-stack and chunked execution modes, plus optional CUDA preprocessing.
+- RAM saving options: Single-stack and chunked execution modes, plus optional CUDA preprocessing, Optional Conversion of pixels to 8bit depth, 16bit is probably overkill.
 - CSV tables, compatibility output names, run configuration, and plots.
 
 ## New Features
