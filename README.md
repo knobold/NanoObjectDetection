@@ -40,12 +40,15 @@ definitions, see the
 -> if its a bug caused by this repo, not your local installation open an Issue or write me a detailed  Bug report on Slack. Paste console logs or anything that helps me solve your issue.
 
 ## Installation
+Download this repo as a .zip file and unpack it. Or use Git/Github Desktop to download. Advantage of Github is that you easily get new releases via a pull to your local folder. 
 
-Use Python with a virtual environment. From the repository folder, install the
-package and its dependencies in PowerShell:
+Go to the Folder in a Terminal.  
+Use Python with your virtual environment. From the repository folder, install the
+package and its dependencies in PowerShell.
 
 ```powershell
-py -m venv .venv
+cd C:\\user\\NanoObjectDetection2 #your local folder
+py -m venv .venv #ur environment
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install .
@@ -54,6 +57,7 @@ python -m pip install .
 On macOS or Linux, create and activate the environment with:
 
 ```bash
+cd ~/NanoObjectDetection2
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
