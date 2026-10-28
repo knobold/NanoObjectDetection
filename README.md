@@ -44,7 +44,16 @@ Download this repo as a .zip file and unpack it. Or use Git/Github Desktop to do
 
 Go to the Folder in a Terminal.  
 Use Python with your virtual environment. From the repository folder, install the
-package and its dependencies in PowerShell.
+package and its dependencies.
+
+```CMD
+cd C:\user\NanoObjectDetection2
+conda activate base # if managed by conda/mamba
+#py -m venv .venv
+#.\.venv\Scripts\activate.bat
+python -m pip install --upgrade pip
+python -m pip install .
+```
 
 ```powershell
 cd C:\\user\\NanoObjectDetection2 #your local folder
