@@ -48,7 +48,7 @@ package and its dependencies.
 
 ```CMD
 cd C:\user\NanoObjectDetection2
-conda activate base # if managed by conda/mamba
+conda activate base #if managed by conda/mamba
 #py -m venv .venv
 #.\.venv\Scripts\activate.bat
 python -m pip install --upgrade pip
@@ -56,8 +56,8 @@ python -m pip install .
 ```
 
 ```powershell
-cd C:\\user\\NanoObjectDetection2 #your local folder
-py -m venv .venv #ur environment
+cd C:\user\NanoObjectDetection2 #your local folder
+py -m venv .venv #ur environment 
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install .
