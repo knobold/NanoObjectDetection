@@ -9,8 +9,9 @@ keeps compatibility with the 1.0 parameter format and adds blockwise
 processing and optional CUDA acceleration.
 
 The source checkout also contains the original 1.0 implementation in
-[`nanoobjectdetection_1_0/`](./nanoobjectdetection_1_0/); the installable
-distribution packages the 2.0 pipeline. For full parameter descriptions,
+[`nanoobjectdetection_legacy/`](./nanoobjectdetection_legacy/); the installable
+distribution packages the modern pipeline under the `nanoobjectdetection`
+package. For full parameter descriptions,
 scientific methods, compatibility details, limitations, and output-file
 definitions, see the
 [2.0 documentation](./NANOOBJECTDETECTION_2_0_DOCUMENTATION.md).
@@ -41,67 +42,64 @@ definitions, see the
 -> if its a bug caused by this repo, not your local installation open an Issue or write me a detailed  Bug report on Slack. Paste console logs or anything that helps me solve your issue.
 
 ## Installation
-Download this repo as a .zip file and unpack it. Or use Git/Github Desktop to download. Advantage of Github is that you easily get new releases via a pull to your local folder. 
 
-Go to the Folder in a Terminal.  
-Use Python with your virtual environment. From the repository folder, install the
-package and its dependencies.
+### From PyPI (Recommended)
 
-```CMD
-cd C:\user\NanoObjectDetection2
-conda activate base #if managed by conda/mamba
-#py -m venv .venv
-#.\.venv\Scripts\activate.bat
-python -m pip install --upgrade pip
-python -m pip install .
-```
-
-```powershell
-cd C:\user\NanoObjectDetection2 #your local folder
-py -m venv .venv #ur environment 
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install .
-```
-
-On macOS or Linux, create and activate the environment with:
+Install the latest release directly via pip:
 
 ```bash
-cd ~/NanoObjectDetection2
-python3 -m venv .venv
-source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install nanoobjectdetection
+```
+
+For GPU acceleration with CUDA 12.x:
+
+```bash
+python -m pip install "nanoobjectdetection[gpu]"
+```
+
+### From Source Checkout
+
+Download this repo as a `.zip` file and unpack it, or clone via Git.
+From the repository folder, activate your environment and install:
+
+```bash
 python -m pip install --upgrade pip
 python -m pip install .
 ```
 
-The installation adds the `nanoobjectdetection` command. It can be run from
-any working directory and does not require editing `main.py`. To install an
-editable development copy instead, use `python -m pip install -e .` from the
-repository folder.
+To install an editable development copy instead, use `python -m pip install -e .` from the repository folder.
 
-### Python example
+The installation adds the `nanoobjectdetection` CLI command. It can be run from
+any working directory:
 
-After installing the package, run the included `example.py` from any directory.
-Use absolute paths, or paths relative to the directory where you run the
-command:
+```bash
+nanoobjectdetection --input-file "path/to/stack.tif" --output-dir "path/to/output"
+```
+
+### Python Example & Scripting
+
+The recommended way to use the package is to adjust analysis parameters in an example script. Run the included [`example/example.py`](./example/example.py) from any directory:
 
 ```powershell
-python "D:\Python\NanoObjectDetection\example.py" `
-  --input-file "C:\data\my_stack.tif" `
-  --output-dir "C:\data\my_analysis" `
+python "example/example.py" `
+  --input-file "path/to/my_stack.tif" `
+  --output-dir "path/to/my_analysis" `
   --background-stack-storage disk `
   --processing-bit-depth 8 `
   --dimension all
 ```
 
-The script imports `run` from the installed `nanoobjectdetection_2_0`
-package.
+The script imports `run` directly from the installed package:
+```python
+from nanoobjectdetection import run
+```
 Its `PARAMETERS` dictionary and processing settings near the top of
-`example.py` expose the analysis configuration for editing. Omit
+`example/example.py` expose the full analysis configuration for editing. Omit
 `--parameter-file` to use those settings; optionally add
-`--parameter-file "C:\data\parameter.json"` to use a legacy JSON instead.
-Input/output paths can be set in the script or passed as options.
-Run `python "D:\Python\NanoObjectDetection\example.py" --help` for options.
+`--parameter-file "path/to/parameter.json"` to use a legacy JSON instead.
+Input/output paths can be configured directly inside the script or passed as CLI options.
+Run `python example/example.py --help` for all options.
 
 ### Optional GPU preprocessing
 

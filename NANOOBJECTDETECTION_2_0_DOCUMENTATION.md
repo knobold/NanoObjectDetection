@@ -10,8 +10,8 @@ names while adding two execution modes:
 1. blockwise TIFF storage and localization for large inputs;
 2. optional CUDA preprocessing and uint16 conversion.
 
-The original 1.0 package remains available in `nanoobjectdetection_1_0/`.
-Version 2.0 is the active pipeline described in this guide.
+The original 1.0 package remains available in `nanoobjectdetection_legacy/`.
+The modern pipeline is packaged under the `nanoobjectdetection` module.
 
 The design principle is **same scientific settings, different execution
 backend**. Changing from `single_stack` to `chunked` should not require

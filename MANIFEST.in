@@ -1,0 +1,5 @@
+prune example
+prune nanoobjectdetection_legacy
+exclude NANOOBJECTDETECTION_1_0_DOCUMENTATION.pdf
+exclude NANOOBJECTDETECTION_2_0_DOCUMENTATION.pdf
+global-exclude *.py[cod] __pycache__ *.so *.dylib *.safeBackup*

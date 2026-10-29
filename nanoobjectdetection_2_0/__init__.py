@@ -1,22 +1,30 @@
-"""NanoObjectDetection 2.0: 1.0-compatible chunked/GPU pipeline."""
+"""Backward-compatibility module forwarding to nanoobjectdetection."""
 
-from .application import run
-from .config import AnalysisConfig
-from .pipeline import AnalysisPipeline
-from .drift import correct_global
-from .hindrance import corrected_diameter_nm, hindrance_factor, local_channel_diameter_nm
-from .msd import calculate_msd, estimate_diffusion
-from .synthetic import brownian_trajectories
+import sys
+import nanoobjectdetection
 
-__all__ = [
-    "AnalysisConfig",
-    "AnalysisPipeline",
-    "brownian_trajectories",
-    "calculate_msd",
-    "correct_global",
-    "corrected_diameter_nm",
-    "estimate_diffusion",
-    "hindrance_factor",
-    "local_channel_diameter_nm",
-    "run",
-]
+# Forward package attributes
+__all__ = nanoobjectdetection.__all__
+__version__ = nanoobjectdetection.__version__
+
+for name in __all__:
+    globals()[name] = getattr(nanoobjectdetection, name)
+
+# Ensure submodules imported via `from nanoobjectdetection_2_0.submodule import ...` work
+import importlib
+
+class _CompatibilityFinder:
+    """Redirects imports from nanoobjectdetection_2_0 to nanoobjectdetection."""
+    @classmethod
+    def find_spec(cls, fullname, path=None, target=None):
+        if fullname.startswith("nanoobjectdetection_2_0."):
+            submodule = fullname[len("nanoobjectdetection_2_0."):]
+            try:
+                real_module = importlib.import_module(f"nanoobjectdetection.{submodule}")
+                sys.modules[fullname] = real_module
+                return real_module.__spec__
+            except ImportError:
+                return None
+        return None
+
+sys.meta_path.insert(0, _CompatibilityFinder)
