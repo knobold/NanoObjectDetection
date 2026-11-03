@@ -1,7 +1,0 @@
-{
-     "Fiber": {
-          "Mode": "Gaussian",
-          "TubeDiameter_nm": 1E9,
-          "Waist": 1E9
-     }
-}

@@ -6,21 +6,41 @@ import pandas as pd
 import numpy as np
 import os
 import sys
+import warnings
 from concurrent.futures import ProcessPoolExecutor
 
-def _locate_frame(args):
+
+def _locate_frame(args) -> tuple[pd.DataFrame, bool]:
     import trackpy as tp
 
     frame, diameter, minmass, separation, percentile, preprocess = args
-    return tp.locate(
-        frame,
-        diameter,
-        minmass=minmass,
-        separation=separation,
-        percentile=percentile,
-        preprocess=preprocess,
-        engine="python",
-    )
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        found = tp.locate(
+            frame,
+            diameter,
+            minmass=minmass,
+            separation=separation,
+            percentile=percentile,
+            preprocess=preprocess,
+            engine="python",
+        )
+
+    black_image_warning = False
+    for warning in caught:
+        if (
+            warning.category is UserWarning
+            and str(warning.message) == "Image is completely black."
+        ):
+            black_image_warning = True
+        else:
+            warnings.warn_explicit(
+                warning.message,
+                warning.category,
+                warning.filename,
+                warning.lineno,
+            )
+    return found, black_image_warning
 
 
 def locate(
@@ -62,8 +82,17 @@ def locate(
                 results = list(pool.map(_locate_frame, jobs, chunksize=batch))
     else:
         results = [_locate_frame(job) for job in jobs]
+    black_frames = sum(is_black for _, is_black in results)
+    if black_frames:
+        warnings.warn(
+            f"Trackpy found {black_frames} completely black image frame(s). "
+            "If using 8-bit processing, try switching to 16-bit processing. "
+            "The exposure may also have been too low.",
+            UserWarning,
+            stacklevel=2,
+        )
     detections = []
-    for frame_number, found in enumerate(results):
+    for frame_number, (found, _) in enumerate(results):
         if not found.empty:
             found = found.copy()
             found["frame"] = frame_number

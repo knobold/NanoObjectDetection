@@ -546,7 +546,11 @@ class AnalysisPipeline:
             )
             maximum = max(maximum, float(np.max(np.maximum(processed, 0.0))))
         if maximum <= 0:
-            raise RuntimeError("Processed image stack contains no positive intensity")
+            raise RuntimeError(
+                "Processed image stack contains no positive intensity; the images "
+                "appear completely black. If using 8-bit processing, try switching "
+                "to 16-bit processing. The exposure may also have been too low."
+            )
         return maximum
 
     @property
