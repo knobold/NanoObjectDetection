@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt # libraries for plotting
 from matplotlib import animation # allows to create animated plots and videos from them
 import os.path
 
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 from matplotlib.gridspec import GridSpec
     
 import matplotlib.colors as colors
@@ -352,16 +352,9 @@ def AnimateDiameterAndRawData_Big(rawframes_rot, sizes_df_lin, traj, ParameterJs
         
         nd.logger.info("Save the animation ...starting")
         
-        # plt.animation can only save in the current directory. so we have to change it (and than go back)
-        current_directory = os.getcwd()
-        
         save_folder = settings["Plot"]["SaveFolder"]
-        os.chdir(save_folder)
-        
-        anim.save("animation.html", writer = 'html', fps=10)
-        
-        # go back to old path
-        os.chdir(current_directory)
+        os.makedirs(save_folder, exist_ok=True)
+        anim.save(os.path.join(save_folder, "animation.html"), writer = 'html', fps=10)
         
         nd.logger.info("Save the animation ...finished")
     
@@ -369,5 +362,4 @@ def AnimateDiameterAndRawData_Big(rawframes_rot, sizes_df_lin, traj, ParameterJs
         anim = animation.FuncAnimation(fig, animate, frames = show_frames, init_func=init, interval = 5, repeat = True)
     
     return anim
-
 

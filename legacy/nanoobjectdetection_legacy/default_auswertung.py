@@ -11,14 +11,14 @@ from __future__ import division, unicode_literals, print_function # For compatib
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import os
 
 # own Library
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 
 
 #%% path of parameter file
-# this must be replaced by any json file
-ParameterJsonFile = r'Insert Json Path here, like: Z:\Datenauswertung\Ronny_Foerster\sdl_80nm\parameter.json'
+ParameterJsonFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "parameter.json")
 
 
 #%% check if the python version and the library are good

@@ -5,6 +5,9 @@ Created on Wed Nov 10 15:06:08 2021
 @author: foersterronny
 """
 
+import datetime
+import os
+
 
 def GetTrajHistory(frame, traj_roi):
     """ returns the entire history of trajectories for particles which exist in the current frame
@@ -52,7 +55,7 @@ def GetPosEvaluated(frame, traj_roi, sizes_df_lin):
 
  
 def AnimateProcessedRawData(ParameterJsonFile, rawframes_rot, t4_cutted, t6_final, sizes_df_lin, sizes_df_lin_rolling):
-    import nanoobjectdetection_1_0 as nd
+    import nanoobjectdetection_legacy as nd
     
     settings = nd.handle_data.ReadJson(ParameterJsonFile)
     
@@ -221,18 +224,16 @@ def AnimateProcessedRawData(ParameterJsonFile, rawframes_rot, t4_cutted, t6_fina
     save_folder_name = settings["Plot"]["SaveFolder"]
     save_image_name = "animate_results"
     
-    my_dir_name = '%s\\{date:%y%m%d}\\'.format( date=datetime.datetime.now()) %save_folder_name
-    
-    try:
-        os.stat(my_dir_name)
-    except:
-        os.mkdir(my_dir_name) 
+    my_dir_name = os.path.join(
+        save_folder_name, datetime.datetime.now().strftime("%y%m%d")
+    )
+    os.makedirs(my_dir_name, exist_ok=True)
     
     time_string = '{date:%H_%M_%S}'.format( date=datetime.datetime.now())
     
     file_name_image = '%s_%s.gif'.format( date=datetime.datetime.now()) %(time_string, save_image_name)
     
-    entire_path_image = my_dir_name +  file_name_image
+    entire_path_image = os.path.join(my_dir_name, file_name_image)
     
     
     print("start saving")

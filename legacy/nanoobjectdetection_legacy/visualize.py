@@ -25,8 +25,8 @@ import scipy
 import os.path
 import time
 
-import nanoobjectdetection_1_0 as nd
-from nanoobjectdetection_1_0.PlotProperties import axis_font, title_font, params
+import nanoobjectdetection_legacy as nd
+from nanoobjectdetection_legacy.PlotProperties import axis_font, title_font, params
 
 
 def SetXYLim(x_min_max = None, y_min_max = None):
@@ -42,7 +42,7 @@ def SetXYLim(x_min_max = None, y_min_max = None):
 def Plot1DPlot(plot_np, title = None, xlabel = None, ylabel = None, settings = None):
     """ plot 1D-data in standardized format as line plot """
     
-    import nanoobjectdetection_1_0 as nd
+    import nanoobjectdetection_legacy as nd
     
     plt.figure()
     plt.plot(plot_np)
@@ -678,7 +678,7 @@ def PlotDiameterPDF(ParameterJsonFile, sizes_df_lin, plotInSizesSpace=True, fitI
     """
     nd.logger.warning("RF 211008: needs an update with the limits")
     
-    import nanoobjectdetection_1_0 as nd
+    import nanoobjectdetection_legacy as nd
     settings = nd.handle_data.ReadJson(ParameterJsonFile)
     
     DiameterPDF_Show = settings["Plot"]['DiameterPDF']
@@ -1100,7 +1100,7 @@ def PlotInfobox1N(ax, sizes):
     NB: Quantiles are used here in order to give an idea of the sigma-intervals
         independent of any Gaussian fit.
     """
-    from nanoobjectdetection_1_0.PlotProperties import axis_font
+    from nanoobjectdetection_legacy.PlotProperties import axis_font
     
     diam_inv_mean, diam_inv_std, diam_inv_median, diam_inv_CI68, diam_inv_CI95 = \
         nd.statistics.StatisticOneParticle(sizes)
@@ -1206,16 +1206,10 @@ def CreateFileAndFolderName(folder_name, file_name, d_type = 'png'):
     if folder_name == "auto":
         nd.logger.error("Folder name not given and still auto. Specify folder or run CheckSystem.")
     
-    dir_name = '%s\\{date:%y%m%d}\\'.format( date=datetime.datetime.now()) %folder_name
-
-    if len(dir_name) > 259:
-        print("\n directory name: \n", dir_name)
-        raise ValueError ("directory name to long for windows!")
-
-    try:
-        os.stat(dir_name)
-    except:
-        os.mkdir(dir_name) 
+    dir_name = os.path.join(
+        folder_name, datetime.datetime.now().strftime("%y%m%d")
+    )
+    os.makedirs(dir_name, exist_ok=True)
     
     time_string = '{date:%H_%M_%S}'.format( date=datetime.datetime.now())
     
@@ -1223,11 +1217,7 @@ def CreateFileAndFolderName(folder_name, file_name, d_type = 'png'):
     file_name_image = '%s_%s'.format( date=datetime.datetime.now()) %(time_string, file_name)
     file_name_image = file_name_image + '.' + d_type
     
-    entire_path = dir_name +  file_name_image
-
-    if len(entire_path) > 259:
-        print("\n entire path: \n", entire_path)
-        raise ValueError ("full path to long name to long for windows!")
+    entire_path = os.path.join(dir_name, file_name_image)
 
     return dir_name, entire_path, time_string
 
@@ -1240,7 +1230,7 @@ def save_plot_points(data, save_folder_name, save_csv_name):
 
 
 def export(save_folder_name, save_image_name, settings = None, use_dpi = None, data = None, data_header = None, ShowPlot = -1):    
-    import nanoobjectdetection_1_0 as nd
+    import nanoobjectdetection_legacy as nd
     if settings is None:
         if use_dpi is None:
             sys.exit("need settings or dpi!")
@@ -1509,7 +1499,7 @@ def PlotGlobalDrift(d,settings,save=True):
    
     
 def MsdOverLagtime(lagt_direct, mean_displ_direct, mean_displ_fit_direct_lin, collect_data = None, alpha_values = 0.5, alpha_fit = 0.3):
-    from nanoobjectdetection_1_0.PlotProperties import axis_font, title_font
+    from nanoobjectdetection_legacy.PlotProperties import axis_font, title_font
 
 
     t_ms = lagt_direct * 1000
@@ -1529,8 +1519,8 @@ def MsdOverLagtime(lagt_direct, mean_displ_direct, mean_displ_fit_direct_lin, co
 
     
     
-# def VarDiameterOverTracklength(sizes_df_lin, save_folder_name = r'Z:\Datenauswertung\19_ARHCF', save_image_name = 'errorpropagation_diameter_vs_trajectorie_length'):
-#     import nanoobjectdetection_1_0 as nd
+# def VarDiameterOverTracklength(sizes_df_lin, save_folder_name=None, save_image_name='errorpropagation_diameter_vs_trajectorie_length'):
+#     import nanoobjectdetection_legacy as nd
 #     from nd.PlotProperties import axis_font, title_font
 #     # NO WORKING AT THE MOMENT BECAUSE ERROR IS NOT RIGHT YET
     
@@ -1565,7 +1555,7 @@ def MsdOverLagtime(lagt_direct, mean_displ_direct, mean_displ_fit_direct_lin, co
     
 def VarDiameterOverMinTracklength(settings, sizes_df_lin, obj_all, num_bins_traj_length = 100, min_traj_length = 0, max_traj_length = 1000):
     """ [insert description here] """
-    import nanoobjectdetection_1_0 as nd
+    import nanoobjectdetection_legacy as nd
     from nd.PlotProperties import axis_font, title_font
           
     diameter_by_min_trajectorie = pd.DataFrame(np.zeros((max_traj_length, 6)),columns=['min_trajectorie_length', 'particles_min_length', 'tot_traj_length', 'rel_traj_length', 'mean_diam_min', 'std_diam_min'])
@@ -1647,7 +1637,7 @@ def VarDiameterOverMinTracklength(settings, sizes_df_lin, obj_all, num_bins_traj
 
     
     
-    save_folder_name = r'Z:\Datenauswertung\19_ARHCF'
+    save_folder_name = settings["Plot"]["SaveFolder"]
     save_image_name = 'statistic_diameter_vs_trajectorie_length'
     
     nd.mpl_style.export(save_folder_name, save_image_name)
@@ -1657,7 +1647,7 @@ def VarDiameterOverMinTracklength(settings, sizes_df_lin, obj_all, num_bins_traj
 def HistogrammDiameterOverTime(sizes_df_lin,ParameterJsonFile):
     """ ?? obsolete ?? """
     import matplotlib.cm as cm
-    from nanoobjectdetection_1_0.PlotProperties import axis_font, title_font
+    from nanoobjectdetection_legacy.PlotProperties import axis_font, title_font
     
     settings = nd.handle_data.ReadJson(ParameterJsonFile)
  
@@ -1699,7 +1689,7 @@ def HistogrammDiameterOverTime(sizes_df_lin,ParameterJsonFile):
     my_time = my_frame / effective_fps
     
 
-#    from nanoobjectdetection_1_0.PlotProperties import axis_font, title_font
+#    from nanoobjectdetection_legacy.PlotProperties import axis_font, title_font
 #    import matplotlib
 #    matplotlib.rcParams['text.usetex'] = True
 #    matplotlib.rcParams['text.latex.unicode'] = True

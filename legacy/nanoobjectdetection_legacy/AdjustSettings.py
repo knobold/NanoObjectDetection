@@ -9,7 +9,7 @@ This module tries to optimize the required parameters for the reconstruction of 
 """
 
 # inport the required packages
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 import numpy as np 
 import trackpy as tp
 import matplotlib.pyplot as plt

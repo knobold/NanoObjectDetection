@@ -9,7 +9,7 @@ import numpy as np # Library for array-manipulation
 import pandas as pd # Library for DataFrame Handling
 import trackpy as tp # trackpy offers all tools needed for the analysis of diffusing particles
 import sys
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 
 
 

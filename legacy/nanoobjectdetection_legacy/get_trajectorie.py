@@ -15,7 +15,7 @@ import sys
 import multiprocessing
 from joblib import Parallel, delayed
 
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 import matplotlib.pyplot as plt # Libraries for plotting
 
 
@@ -135,7 +135,7 @@ def FindSpots_plotting(frames_np, output, settings, gamma):
 
     """
     
-    from nanoobjectdetection_1_0.PlotProperties import axis_font, title_font
+    from nanoobjectdetection_legacy.PlotProperties import axis_font, title_font
 
 
     nd.logger.warning("Warning, RF trys something here...")
@@ -210,11 +210,13 @@ def FindSpots_tp(frames_np, diameter, minmass, separation, max_iterations, DoPre
         # make it parallel accoring to the trackpy version
         tp_version = nd.Tools.GetTpVersion()
         if tp_version == 5:
-            nd.logger.warning("Trackpy 5 has problems running in parallel on windows =/. Use tracpy 4 instead. (0.4.2 is good)")
+            nd.logger.warning(
+                "Parallel particle finding is not supported with Trackpy 0.5+; "
+                "falling back to serial processing."
+            )
+            output = tp.batch(frames_np, diameter, minmass = minmass, separation = separation, max_iterations = max_iterations, preprocess = DoPreProcessing, engine = 'auto', percentile = percentile)
 
-            # output = tp.batch(frames_np, diameter, minmass = minmass, separation = separation, max_iterations = max_iterations, preprocess = DoPreProcessing, engine = 'auto', percentile = percentile)
-
-        if tp_version == 4:
+        elif tp_version == 4:
             nd.logger.debug("Find the particles - Trackpy 4")
             
             # prepare parallel processing
@@ -249,6 +251,12 @@ def FindSpots_tp(frames_np, diameter, minmass, separation, max_iterations, DoPre
 
             # reset the index which starts at every frame again
             output = output.reset_index(drop=True)
+        else:
+            nd.logger.warning(
+                "Parallel particle finding is only supported with Trackpy 0.4; "
+                "falling back to serial processing."
+            )
+            output = tp.batch(frames_np, diameter, minmass = minmass, separation = separation, max_iterations = max_iterations, preprocess = DoPreProcessing, engine = 'auto', percentile = percentile)
 
     nd.logger.info("Find the particles - finished")
 

@@ -1308,7 +1308,7 @@ def Correlation(ParameterJsonFile, sizes_df_lin, show_plot = None, save_plot = N
     for more information, see
     https://stackoverflow.com/questions/30942577/seaborn-correlation-coefficient-on-pairgrid
     """
-    import nanoobjectdetection_1_0 as nd
+    import nanoobjectdetection_legacy as nd
     
     settings = nd.handle_data.ReadJson(ParameterJsonFile)
     
@@ -1333,8 +1333,8 @@ def Correlation(ParameterJsonFile, sizes_df_lin, show_plot = None, save_plot = N
 
 
 def Pearson(ParameterJsonFile, sizes_df_lin, show_plot = None, save_plot = None):
-    import nanoobjectdetection_1_0 as nd
-    from nanoobjectdetection_1_0.PlotProperties import axis_font
+    import nanoobjectdetection_legacy as nd
+    from nanoobjectdetection_legacy.PlotProperties import axis_font
     
     settings = nd.handle_data.ReadJson(ParameterJsonFile)
     

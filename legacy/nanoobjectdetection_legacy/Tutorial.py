@@ -20,11 +20,11 @@ INFORMATION:
         
     b.	Change the entry under “Plot” > “SaveFolder” to the path where the images shall be safed
     
-        i.	E.g: “C:\\Users\\foersterronny\\Desktop\\Trynanoobjectdetection_1_0”
+        i.	E.g: “C:\\Users\\foersterronny\\Desktop\\Trynanoobjectdetection_legacy”
         
     c.	Change the entry under “Plot” > “SaveFolder” to the path where the properties shall be safed
     
-        i.	E.g: “C:\\Users\\foersterronny\\Desktop\\Trynanoobjectdetection_1_0”
+        i.	E.g: “C:\\Users\\foersterronny\\Desktop\\Trynanoobjectdetection_legacy”
         
     d.	Safe and close
         
@@ -49,7 +49,7 @@ from __future__ import division, unicode_literals, print_function # For compatib
 from importlib import reload # only used for debugging --> reload(package_name)
 
 # Own Library
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 import os
 
 abs_path = os.path.dirname(nd.__file__)
@@ -63,14 +63,16 @@ def RandomWalk():
      """
      
     # path of parameter json file
-    ParameterJsonFile = abs_path + "\\tutorial\\Randomwalk\\tutorial_60nm_randomwalk.json"
+    ParameterJsonFile = os.path.join(
+        abs_path, "tutorial", "Randomwalk", "tutorial_60nm_randomwalk.json"
+    )
 
     #%% check if the python version and the library are good
     """
     Python and Trackpy have a lot of version. The script does not work for the 'old' versions
     Thus they are checked here, if they meet the minimum requirements.
     """
-    nd.CheckSystem.CheckAll()
+    nd.CheckSystem.CheckAll(ParameterJsonFile)
     
     
     #%% find the objects
@@ -218,14 +220,16 @@ def MonaARHCF():
 
     """
     # path of parameter json file
-    ParameterJsonFile = abs_path + "\\tutorial\\ARHCF_Mona_50nm\\tutorial_50nm_beads.json"
+    ParameterJsonFile = os.path.join(
+        abs_path, "tutorial", "ARHCF_Mona_50nm", "tutorial_50nm_beads.json"
+    )
 
     #%% check if the python version and the library are good
     """
     Python and Trackpy have a lot of version. The script does not work for the 'old' versions
     Thus they are checked here, if they meet the minimum requirements.
     """
-    nd.CheckSystem.CheckAll()
+    nd.CheckSystem.CheckAll(ParameterJsonFile)
     
     
     #%% read in the raw data into numpy
@@ -464,14 +468,16 @@ def StefanARHCF():
 
     """
     # path of parameter json file
-    ParameterJsonFile = abs_path + "\\tutorial\\ARHCF_Stefan_40nm\\tutorial_ARHCF_Stefan_40nm.json"
+    ParameterJsonFile = os.path.join(
+        abs_path, "tutorial", "ARHCF_Stefan_40nm", "tutorial_ARHCF_Stefan_40nm.json"
+    )
     
     #%% check if the python version and the library are good
     """
     Python and Trackpy have a lot of version. The script does not work for the 'old' versions
     Thus they are checked here, if they meet the minimum requirements.
     """
-    nd.CheckSystem.CheckAll()
+    nd.CheckSystem.CheckAll(ParameterJsonFile)
     
     
     #%% read in the raw data into numpy
@@ -700,11 +706,13 @@ def HeraeusNanobore():
     
     #%% path of parameter file
     # this can be replaced by any json file
-    ParameterJsonFile = abs_path + "\\tutorial\\Nanobore_Torsten_100nm\\100nist_2000_40fps_0.json"
+    ParameterJsonFile = os.path.join(
+        abs_path, "tutorial", "Nanobore_Torsten_100nm", "100nist_2000_40fps_0.json"
+    )
 
     
     #%% check if the python version and the library are good
-    nd.CheckSystem.CheckAll()
+    nd.CheckSystem.CheckAll(ParameterJsonFile)
     
     
     #%% read in the raw data into numpy
@@ -804,4 +812,3 @@ def HeraeusNanobore():
     
     
     
-

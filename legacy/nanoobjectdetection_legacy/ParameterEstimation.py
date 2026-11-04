@@ -6,7 +6,7 @@ Created on Thu Feb 27 15:12:14 2020
 
 @author: foersterronny
 """
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import ndimage

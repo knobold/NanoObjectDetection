@@ -10,9 +10,9 @@ collection of functions for statistical information on the tracking data
 """
 import numpy as np
 import pandas as pd
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 import matplotlib.pyplot as plt # libraries for plotting
-from nanoobjectdetection_1_0.PlotProperties import axis_font, title_font, params
+from nanoobjectdetection_legacy.PlotProperties import axis_font, title_font, params
 
 
 def GetCI_Interval(probability, grid, ratio_in_ci):
@@ -279,7 +279,7 @@ def CalcInversePDF(grid, sizes_df_lin, settings, useCRLB):
         Each trajectory is considered individually, the tracklength determines
         the PDF widths (via CRLB or Qian91).
     """
-    import nanoobjectdetection_1_0 as nd
+    import nanoobjectdetection_legacy as nd
     from scipy.stats import norm
     
     grid_steps = abs(grid[:-1]-grid[1:])

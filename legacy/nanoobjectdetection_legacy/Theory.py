@@ -11,7 +11,7 @@ collection of standard equations of physics, unit conversions etc.
 import numpy as np
 
 import multiprocessing
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 from joblib import Parallel, delayed
 from scipy.constants import Boltzmann as k_b
 from scipy.constants import pi as pi

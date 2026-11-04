@@ -8,7 +8,7 @@ Created on Wed Jul 10 09:33:42 2019
 from setuptools import setup, find_packages
 
 setup(
-    name='nanoobjectdetection_1_0',
+    name='nanoobjectdetection_legacy',
     version="1.0",
     author='Stefan Weidlich & Ronny Förster',
     author_email='ronny.foerster.jena@gmail.com',

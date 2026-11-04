@@ -7,7 +7,7 @@ This is a startup file that can be used of the user to load important module aut
 @author: foersterronny
 """
 
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 import numpy as np
 import trackpy as tp
 import pandas as pd

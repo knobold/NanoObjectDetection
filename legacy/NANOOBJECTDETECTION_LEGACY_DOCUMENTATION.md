@@ -3,7 +3,7 @@
 ## Purpose and scope
 
 The 1.0 implementation is the original Python 3.9-oriented package in
-`nanoobjectdetection_1_0/`. The complete example workflow is
+`nanoobjectdetection_legacy/`. The complete example workflow is
 `/path/to/example/auswertung.py`; its settings are stored in
 `/path/to/example/parameter.json`.
 The 1.0 code loads the complete image stack into memory and is therefore
@@ -16,9 +16,16 @@ channel, 0.3467 micrometres/pixel, water at 293.85 K, and 50 nm gold particles.
 
 ## Running the 1.0 example
 
-Edit `File.data_file_name`, `File.data_folder_name`, `File.json`, and the plot
-save paths in `/path/to/example/parameter.json` so they point to the local
-machine. `/path/to/example/auswertung.py` contains a
+Running `main.py` starts the setup dialog. When you finish entering the
+settings, it creates `auswertung.py` and `parameter.json` in the selected
+results folder and immediately runs the evaluation script.
+Paths entered in a parameter file may be absolute or relative to that JSON
+file's folder. The setup dialog records the selected TIFF path automatically.
+
+For a manually configured run, edit `File.data_file_name`,
+`File.data_folder_name`, `File.json`, and the plot save paths in
+`/path/to/example/parameter.json` so they point to the local machine.
+`/path/to/example/auswertung.py` contains a
 original acquisition computer and must also be edited.
 
 The script performs:

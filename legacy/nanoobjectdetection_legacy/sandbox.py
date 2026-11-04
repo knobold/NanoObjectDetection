@@ -13,7 +13,7 @@ from matplotlib.gridspec import GridSpec
 from joblib import Parallel, delayed
 import multiprocessing
 
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 
 ## In[]
 def RollingMedianFilter_main(image, window = 11):
@@ -207,7 +207,7 @@ def DiameterOverTrajLengthColored(ParameterJsonFile, sizes_df_lin,
     and color it by a property of choice
     """
         
-    import nanoobjectdetection_1_0 as nd
+    import nanoobjectdetection_legacy as nd
 
     settings = nd.handle_data.ReadJson(ParameterJsonFile)
     Histogramm_min_max_auto = settings["Plot"]["Histogramm_min_max_auto"]
@@ -295,7 +295,7 @@ def DiameterPDF_transparent(ParameterJsonFile, sizes_df_lin, histogramm_min = No
     diam_grid
     ax
     """
-    import nanoobjectdetection_1_0 as nd
+    import nanoobjectdetection_legacy as nd
     from scipy.stats import norm
     # sns.set(style="dark")
     

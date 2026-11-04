@@ -12,7 +12,7 @@ import matplotlib.colors as colors
 import numpy as np
 import matplotlib.pyplot as plt
 
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 
 from pdb import set_trace as bp #debugger
 

@@ -22,7 +22,7 @@ from joblib import Parallel, delayed
 import multiprocessing
 import psutil
 
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 
 
 def ReadJson(mypath):
@@ -38,6 +38,14 @@ def ReadJson(mypath):
     nd.Tools.LoggerSetLevel(settings["Logger"]["level"])
     
     return settings
+
+
+def _resolve_parameter_path(parameter_json_file, path):
+    if not isinstance(path, str) or not path or os.path.isabs(path):
+        return path
+    return os.path.abspath(
+        os.path.join(os.path.dirname(os.path.abspath(parameter_json_file)), path)
+    )
 
 
 
@@ -149,8 +157,12 @@ def ReadData2Numpy(ParameterJsonFile, PerformSanityCheck=True):
 
     # get the file properties
     data_type = settings["File"]["data_type"]
-    data_folder_name = settings["File"]["data_folder_name"]
-    data_file_name = settings["File"]["data_file_name"]
+    data_folder_name = _resolve_parameter_path(
+        ParameterJsonFile, settings["File"]["data_folder_name"]
+    )
+    data_file_name = _resolve_parameter_path(
+        ParameterJsonFile, settings["File"]["data_file_name"]
+    )
     use_num_frame = settings["File"]["use_num_frame"]
 
     
@@ -564,7 +576,9 @@ def UseROI(image, settings, x_min = None, x_max = None, y_min = None, y_max = No
         
         # save ROI if required
         if settings["ROI"]["Save"] == 1:
-            data_folder_name = settings["File"]["data_folder_name"]
+            data_folder_name = _resolve_parameter_path(
+                ParameterJsonFile, settings["File"]["data_folder_name"]
+            )
             SaveROIToTiffStack(image_ROI, data_folder_name)
                 
         nd.logger.info("Size ROI \n (frames, height, width): %s", image_ROI.shape)
@@ -574,11 +588,9 @@ def UseROI(image, settings, x_min = None, x_max = None, y_min = None, y_max = No
 
 
 def SaveROIToTiffStack(image, data_folder_name):
-    data_folder_name_roi = data_folder_name + "\\ROI"
-    if os.path.isdir(data_folder_name_roi) == False:
-        os.makedirs(data_folder_name_roi)
-        
-    data_folder_name_tif = data_folder_name_roi + "\\subimage.tif"
+    data_folder_name_roi = os.path.join(data_folder_name, "ROI")
+    os.makedirs(data_folder_name_roi, exist_ok=True)
+    data_folder_name_tif = os.path.join(data_folder_name_roi, "subimage.tif")
 
 
     nd.logger.info("Save ROI and/or supersampled image in: %s", data_folder_name_tif)
@@ -863,7 +875,7 @@ def SaveTifSeriesAsStack_MainDirectory(main_data_folder_name, CreateSubFolder = 
     
     
     def LoopFunction(subdir_loop, main_data_folder_name, CreateSubFolder, ShowProgress):
-        data_folder_name = main_data_folder_name + "\\" + subdir_loop
+        data_folder_name = os.path.join(main_data_folder_name, subdir_loop)
         
         # check if file is a directory - continue if TRUE
         if os.path.isdir(data_folder_name) == True:   
@@ -947,9 +959,9 @@ def SaveTifSeriesAsStack(data_folder_name, ShowProgress = True, CreateSubFolder 
         num_frames = rawframes_np.shape[0]
         
         if data_tif_name == None:
-            data_folder_name_tif = data_folder_name + "\\3d_stack.tif"
+            data_folder_name_tif = os.path.join(data_folder_name, "3d_stack.tif")
         else:
-            data_folder_name_tif = data_folder_name + "\\" + data_tif_name
+            data_folder_name_tif = os.path.join(data_folder_name, data_tif_name)
     
     
         if ShowProgress == True:
@@ -961,7 +973,9 @@ def SaveTifSeriesAsStack(data_folder_name, ShowProgress = True, CreateSubFolder 
     
         if num_frames > 1000:
             # additional with first 1000 frames
-            data_folder_name_tif_1000 = data_folder_name + "\\3d_stack_1000frames.tif"
+            data_folder_name_tif_1000 = os.path.join(
+                data_folder_name, "3d_stack_1000frames.tif"
+            )
             
             print("Save first 1000 frames in an extra file for faster testing...")
             io.imsave(data_folder_name_tif_1000, rawframes_np[:1000,:,:])

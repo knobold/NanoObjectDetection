@@ -22,7 +22,7 @@ from pdb import set_trace as bp #debugger
 import scipy
 import os.path
 
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 
 # In[]
 

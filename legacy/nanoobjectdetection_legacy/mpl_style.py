@@ -34,14 +34,12 @@ def export(save_folder_name, save_image_name):
 
     plt.show()
     
-    my_dir_name = '%s\\{date:%y%m%d}\\'.format( date=datetime.datetime.now()) %save_folder_name
-    
-    try:
-        os.stat(my_dir_name)
-    except:
-        os.mkdir(my_dir_name) 
+    my_dir_name = os.path.join(
+        save_folder_name, datetime.datetime.now().strftime("%y%m%d")
+    )
+    os.makedirs(my_dir_name, exist_ok=True)
     
     file_name = '{date:%H%M%S}_%s.png'.format( date=datetime.datetime.now()) %save_image_name
-    plt.savefig(my_dir_name +  file_name, dpi=400, bbox_inches='tight')
+    plt.savefig(os.path.join(my_dir_name, file_name), dpi=400, bbox_inches='tight')
     
     print('Figure saved')

@@ -9,17 +9,18 @@ Created on Fri Sep 13 15:20:48 2019
 set up everything from scratch to evaluate new experimental data
 """
 
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 import shutil
 import os
 import json
+import runpy
 from tkinter import filedialog
 
 
 
 def NewEvaluation():
     """
-    Run this function to prepare new data set for evalution
+    Run this function to prepare and evaluate a new data set.
 
     Returns
     -------
@@ -53,15 +54,19 @@ def NewEvaluation():
     nd.logger.info("store results into: %s", dir_results)
     
     # copy default "auswertung.py" into that folder
-    path_aus_origin = os.path.dirname(nd.__file__) + "\\default_files\\default_auswertung.py"
-    path_aus_new = dir_results + "/auswertung.py"
+    path_aus_origin = os.path.join(
+        os.path.dirname(nd.__file__), "default_files", "default_auswertung.py"
+    )
+    path_aus_new = os.path.join(dir_results, "auswertung.py")
     
     shutil.copy2(path_aus_origin, path_aus_new)
     
     
     # copy default json into that folder
-    path_json_origin = os.path.dirname(nd.__file__) + "\\default_json\\default_json.json"
-    mypath = dir_results + "/parameter.json"
+    path_json_origin = os.path.join(
+        os.path.dirname(nd.__file__), "default_json", "default_json.json"
+    )
+    mypath = os.path.join(dir_results, "parameter.json")
     
     shutil.copy2(path_json_origin, mypath)
 
@@ -91,27 +96,45 @@ def NewEvaluation():
         
         if pre_select == 2:
             nd.logger.info("Load: Olympus_4x_0-10_plan_n_Olympus_corpus_Basler_AC4096-40um_camera")
-            path_json_origin = nd_path + "\\default_json\\setup\\Olympus_4x_0-10_plan_n_Olympus_corpus_Basler_AC4096-40um_camera.json"
+            path_json_origin = os.path.join(
+                nd_path, "default_json", "setup",
+                "Olympus_4x_0-10_plan_n_Olympus_corpus_Basler_AC4096-40um_camera.json",
+            )
             
         elif pre_select == 3:
             nd.logger.info("Load: Olympus_10x_0-25_plan_n_Olympus_corpus_Basler_AC4096-40um_camera")
-            path_json_origin = nd_path + "\\default_json\\setup\\Olympus_10x_0-25_plan_n_Olympus_corpus_Basler_AC4096-40um_camera.json"
+            path_json_origin = os.path.join(
+                nd_path, "default_json", "setup",
+                "Olympus_10x_0-25_plan_n_Olympus_corpus_Basler_AC4096-40um_camera.json",
+            )
             
         elif pre_select == 4:
             nd.logger.info("Zeiss_5x_0-13_HD_Olympus_corpus_Basler_AC4096-40um_camera")
-            path_json_origin = nd_path + "\\default_json\\setup\\Zeiss_5x_0-13_HD_Olympus_corpus_Basler_AC4096-40um_camera.json"
+            path_json_origin = os.path.join(
+                nd_path, "default_json", "setup",
+                "Zeiss_5x_0-13_HD_Olympus_corpus_Basler_AC4096-40um_camera.json",
+            )
             
         elif pre_select == 5:
             nd.logger.info("Zeiss 20x 0_40 epiplan Objective with Basler AC4096-40um_camera")
-            path_json_origin = nd_path + "\\default_json\\setup\\default_json_20x 0_40 epiplan Objective with Basler cam.json"
+            path_json_origin = os.path.join(
+                nd_path, "default_json", "setup",
+                "default_json_20x 0_40 epiplan Objective with Basler cam.json",
+            )
             
         elif pre_select == 6:
             nd.logger.info("Zeiss 10x 0_20 epiplan Objective with Basler AC4096-40um_camera")
-            path_json_origin = nd_path + "\\default_json\\setup\\default_json_10x 0_20 epiplan Objective with Basler cam.json"
+            path_json_origin = os.path.join(
+                nd_path, "default_json", "setup",
+                "default_json_10x 0_20 epiplan Objective with Basler cam.json",
+            )
             
         elif pre_select == 7:
             nd.logger.info("Zeiss 10x 0_3 epiplan neofluar Objective with Basler AC4096-40um_camera")
-            path_json_origin = nd_path + "\\default_json\\setup\\Zeiss_10x_0-3_plan_neofluar_Olympus_corpus_Basler_AC4096-40um_camera.json"
+            path_json_origin = os.path.join(
+                nd_path, "default_json", "setup",
+                "Zeiss_10x_0-3_plan_neofluar_Olympus_corpus_Basler_AC4096-40um_camera.json",
+            )
         
             
             
@@ -150,19 +173,19 @@ def NewEvaluation():
         
         if pre_select == 2:
             nd.logger.info("Load: Fiber 1250b3")
-            path_json_origin = nd_path + "\\default_json\\fiber\\1250b3.json"
+            path_json_origin = os.path.join(nd_path, "default_json", "fiber", "1250b3.json")
                         
         elif pre_select == 3:
             nd.logger.info("Load: Fiber 1267b1_start")
-            path_json_origin = nd_path + "\\default_json\\fiber\\1267b1_start.json"
+            path_json_origin = os.path.join(nd_path, "default_json", "fiber", "1267b1_start.json")
                         
         elif pre_select == 4:
             nd.logger.info("Load: LightCage.json")
-            path_json_origin = nd_path + "\\default_json\\fiber\\LightCage.json"
+            path_json_origin = os.path.join(nd_path, "default_json", "fiber", "LightCage.json")
             
         elif pre_select == 5:
             nd.logger.info("Load: NoFiber.json")
-            path_json_origin = nd_path + "\\default_json\\fiber\\NoFiber.json"
+            path_json_origin = os.path.join(nd_path, "default_json", "fiber", "NoFiber.json")
             
             
         with open(path_json_origin) as json_file:
@@ -301,16 +324,13 @@ def NewEvaluation():
 
 
     # Save Everything
-    # Make slash and backslash right
-    settings["File"]["json"] = mypath.replace("/","\\")
+    settings["File"]["json"] = os.path.normpath(mypath)
 
     # save the stuff   
-    nd.handle_data.WriteJson(mypath.replace("/","\\"), settings)    
+    nd.handle_data.WriteJson(mypath, settings)
 
-    # did not no where to put this best.
     nd.logger.info("Information: You can insert the startup.py to your Python Programming to load all the required packages automatically.")        
 
-    print("\nGo to \n{}\n in the explorer and open the py-script and json parameter file.".format(dir_results.replace("/","\\")))
-    
-    
+    print("\nStarting evaluation with {}".format(path_aus_new))
+    runpy.run_path(path_aus_new, run_name="__main__")
     

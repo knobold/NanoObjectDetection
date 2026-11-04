@@ -11,38 +11,34 @@ from __future__ import division, unicode_literals, print_function # For compatib
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import os
 
 # own Library
 import nanoobjectdetection_legacy as nd
 import time #track runtime
 
 import atexit
-import resource
+import psutil
 import sys, threading
 
-def _print_peak_memory():
-    peak_gib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024**2
-    print("[PEAK MEMORY] Peak process RSS: {:.2f} GiB".format(peak_gib), flush=True)
+def _print_process_memory():
+    rss_gib = psutil.Process().memory_info().rss / 1024**3
+    print("[PROCESS MEMORY] Current RSS: {:.2f} GiB".format(rss_gib), flush=True)
 
-atexit.register(_print_peak_memory)
+atexit.register(_print_process_memory)
 
 def _meminfo_gb():
-    """(total, available) system RAM in GB (Linux)"""
-    with open("/proc/meminfo") as f:
-        info = {l.split(":")[0]: int(l.split()[1]) for l in f}
-    return info["MemTotal"] / 1024**2, info["MemAvailable"] / 1024**2
+    """Return total and available system RAM in GiB."""
+    memory = psutil.virtual_memory()
+    return memory.total / 1024**3, memory.available / 1024**3
 
 def _rss_gb():
-    with open("/proc/self/status") as f:
-        for l in f:
-            if l.startswith("VmRSS"):
-                return int(l.split()[1]) / 1024**2
-    return float("nan")
+    return psutil.Process().memory_info().rss / 1024**3
 
 def _oom_message(prefix):
     total, avail = _meminfo_gb()
     return ("\n!!! {}: system RAM total {:.1f} GB, available {:.1f} GB, this process uses {:.1f} GB.\n"
-            "!!! If the process is killed now, the Linux OOM killer did it (out of RAM; check 'dmesg | grep -i oom').\n"
+            "!!! If the process stops unexpectedly, it may have run out of available memory.\n"
             "!!! Reduce the data: set ROI frame_max / use_num_frame in the parameter file, or use a machine with more RAM.\n"
             ).format(prefix, total, avail, _rss_gb())
 
@@ -72,7 +68,9 @@ print(_oom_message("Memory at start"))
 start_time=time.time()
 #%% path of parameter file
 # this must be replaced by any json file
-ParameterJsonFile = "/home/tim/OneDrive/IPHT/Python/NanoObjectDetection/legacy/parameter.json"
+ParameterJsonFile = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "parameter.json"
+)
 
 
 #%% check if the python version and the library are good

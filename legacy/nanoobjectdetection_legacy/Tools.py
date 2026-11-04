@@ -9,7 +9,7 @@ Created on Fri Apr  5 08:54:11 2019
 import numpy as np
 import logging
 
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 
 from packaging import version
 import trackpy as tp

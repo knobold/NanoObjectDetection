@@ -12,7 +12,7 @@ import numpy as np # Library for array-manipulation
 import pandas as pd # Library for DataFrame Handling
 import math # offering some maths functions
 import warnings
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 from pdb import set_trace as bp #debugger
 import matplotlib.pyplot as plt # Libraries for plotting
 import sys

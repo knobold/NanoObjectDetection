@@ -12,7 +12,7 @@ import trackpy as tp
 import pandas as pd
 #from pdb import set_trace as bp #debugger
 from distutils.spawn import find_executable
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 import shutil
 import os
 from packaging import version
@@ -139,20 +139,23 @@ def CheckJson_Exist(ParameterJsonFile):
             json_name = "default_json.json"
             
             # copy standard json to the path where none was found
-            source_path_default_json = nd_path + "\\" + json_name
-            copy_to_path = os.path.dirname(ParameterJsonFile)
-            shutil.copy2(source_path_default_json, copy_to_path)
-            
-            # rename defaul json file to customized name
-            previous_name = copy_to_path + "\\" + json_name
-            os.rename(previous_name, ParameterJsonFile)
+            source_path_default_json = os.path.join(
+                nd_path, "default_json", json_name
+            )
+            copy_to_path = os.path.dirname(ParameterJsonFile) or "."
+            os.makedirs(copy_to_path, exist_ok=True)
+            shutil.copy2(source_path_default_json, ParameterJsonFile)
             
             # write JsonPath into Json itself
-            settings = nd.handle_data.ReadJson(ParameterJsonFile, CreateNew = True)
+            settings = nd.handle_data.ReadJson(ParameterJsonFile)
+            settings["File"]["json"] = os.path.normpath(ParameterJsonFile)
+            nd.handle_data.WriteJson(ParameterJsonFile, settings)
             
             nd.logger.info("Done")
         else:
-            nd.logger.error("Abort")
+            raise FileNotFoundError(
+                "Parameter JSON file does not exist: {}".format(ParameterJsonFile)
+            )
 
     return settings
 
@@ -332,7 +335,9 @@ def CheckJson_specify_default_auto(settings):
     
     # use default_json file if set to default
     if mypath_default == "default":
-        mypath_default = os.path.dirname(nd.__file__) + "\\default_json\\default_json.json"
+        mypath_default = os.path.join(
+            os.path.dirname(nd.__file__), "default_json", "default_json.json"
+        )
         settings["File"]["DefaultParameterJsonFile"] = mypath_default
     
     try:    
@@ -345,7 +350,9 @@ def CheckJson_specify_default_auto(settings):
     
     # set SaveFolder in case of auto     
     if settings["Plot"]["SaveFolder"] == "auto":
-        settings["Plot"]["SaveFolder"] = os.path.dirname(settings["File"]["json"]) + "\\analysis"
+        settings["Plot"]["SaveFolder"] = os.path.join(
+            os.path.dirname(settings["File"]["json"]), "analysis"
+        )
         
     # check if saving folders are valid    
     my_path = settings["Plot"]["SaveFolder"]    
@@ -366,22 +373,24 @@ def CheckIfFolderGeneratable(my_path):
     """
     Checks if a folder exists
     """
-    
-    invalid = False
-    # try if path exists
-    try:
-        os.stat(my_path)
-    except:
-        # try if the path can be created
-        try:
-            os.mkdir(my_path)
-        except:
-            # write on desktop if nothing is working
-            my_path = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
-            invalid = True
-            nd.logger.warning("Path not accessible. Write on desktop. \n If you are not happy with this, try writing <auto> into the json key!")
 
-    return invalid, my_path
+    if os.path.isdir(my_path):
+        return False, my_path
+
+    try:
+        os.makedirs(my_path, exist_ok=True)
+        return False, my_path
+    except OSError as exc:
+        home_path = os.path.expanduser("~")
+        desktop_path = os.path.join(home_path, "Desktop")
+        fallback_path = desktop_path if os.path.isdir(desktop_path) else home_path
+        nd.logger.warning(
+            "Path %s is not accessible (%s). Using %s instead.",
+            my_path,
+            exc,
+            fallback_path,
+        )
+        return True, fallback_path
     
 
     

@@ -7,7 +7,7 @@ Created on Tue Jun  1 14:53:27 2021
 
 import numpy as np # Library for array-manipulation
 import matplotlib.pyplot as plt # Libraries for plotting
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 
 
 def ForceUltraUniformParticle(settings, sizes_df_lin, ShowPlot = True, save_z_score = True):

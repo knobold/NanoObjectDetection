@@ -15,7 +15,7 @@ import trackpy as tp
 
 
 #import matplotlib.pyplot as plt # Libraries for plotting
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 
 
 

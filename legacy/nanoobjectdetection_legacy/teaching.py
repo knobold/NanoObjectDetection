@@ -9,7 +9,7 @@ Some functions to demonstrate a few effects that happen in measurement, analysis
 
 import numpy as np
 import matplotlib.pyplot as plt
-import nanoobjectdetection_1_0 as nd
+import nanoobjectdetection_legacy as nd
 
 def TruthVsResponse(mean, fhwm_truth, sigma_meas, num_particles):
     """

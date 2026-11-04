@@ -17,12 +17,11 @@
           "Center_y_px": "unknown"
      },
      "File": {
-          "data_file_name": "/home/tim/OneDrive/IPHT/Python/NanoObjectDetection/Tifs/20_6\u00b5mKap_50Au_20_7C_100fps_5000fr_700us_V1j.tif",
-          "data_folder_name": "/home/tim/OneDrive/IPHT/Python/NanoObjectDetection/Tifs",
+          "data_file_name": "../Tifs/20_6\u00b5mKap_50Au_20_7C_100fps_5000fr_700us_V1j.tif",
+          "data_folder_name": "../Tifs",
           "data_type": "tif_stack",
           "use_num_frame": "all",
-          "DefaultParameterJsonFile": "/home/tim/OneDrive/IPHT/Python/NanoObjectDetection/legacy/nanoobjectdetection_legacy/default_json/default_json.json",
-          "json": "/home/tim/OneDrive/IPHT/Python/NanoObjectDetection/legacy/parameter.json"
+          "DefaultParameterJsonFile": "default"
      },
      "Logger": {
           "level": "info"
@@ -132,11 +131,10 @@
           "DiamOverTraj": 1,
           "DiamOverTraj_UseRawMass": "mean",
           "fontsize": 14,
-          "SaveFolder": "/home/tim/OneDrive/IPHT/Python/NanoObjectDetection//legacy/analysis/old2",
+          "SaveFolder": "auto",
           "save_json": 1,
           "save_data2csv": 1,
-          "dpi": 300,
-          "SaveProperties": "/home/tim/OneDrive/IPHT/Python/NanoObjectDetection//legacy/analysis/old2\\261103\\15_35_39_Diameter_Histogramm-2d-weighted.json"
+          "dpi": 300
      },
      "Animation": {
           "x_min": "auto",
