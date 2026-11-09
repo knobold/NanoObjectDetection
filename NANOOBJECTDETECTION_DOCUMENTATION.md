@@ -430,6 +430,17 @@ per-particle size table in the legacy 21-column layout. The weighted
 histogram counts each particle once per valid frame; the unweighted histogram
 counts each particle once.
 
+For the standard CSV-driven plotting workflow, open
+`example/plotting_csv.ipynb` in Jupyter and set `CSV_DIR` and `DIMENSION` in
+the configuration cell. The notebook reads the particle-size CSV, displays
+the diameter-count plots (weighted and unweighted) and particle size versus
+trajectory length inline, and exposes the statistical and filtering functions
+used by those plots. Its histogram overlay is a Gaussian fit in diameter space,
+so its peak is at the arithmetic mean; this intentionally differs from the
+reciprocal-space Gaussian fit on the pipeline-generated PNGs. The notebook does
+not rerun the TIFF analysis.
+
+
 ## 7. Chunked and GPU limitations
 
 Chunk overlap prevents many boundary-localization losses; overlapping
