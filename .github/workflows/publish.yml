@@ -1,15 +1,17 @@
 name: Publish to PyPI
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  release:
+    types:
+      - published
   workflow_dispatch:
 
 jobs:
   build:
     name: Build distribution 📦
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -56,7 +58,3 @@ jobs:
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          # Uses Trusted Publishing via OIDC by default.
-          # If using an API token instead, set PYPI_API_TOKEN in repository secrets.
-          password: ${{ secrets.PYPI_API_TOKEN }}
