@@ -21,13 +21,8 @@ OUTPUT_DIR = ROOT / "output_single_cpu_20nm"  # results folder
 PARAMETER_FILE = None #ROOT / "parameter.json"  # path to legacy parameter file
 
 ## Processing parameters
-PROCESSING_MODE: Literal["single_stack", "chunked"] = "single_stack"
-BACKGROUND_STACK_STORAGE: Literal["memory", "disk"] = "memory"
 PROCESSING_BIT_DEPTH: Literal[8, 16] = 16 #if trackpy warn image is completely black, try 16bit. images where probably taken at an exposure time thats too low.
 ANALYSIS_DIMENSION: Literal["all", "x", "y", "2d"] = "all"
-GPU_ENABLED = False
-CHUNK_FRAMES = int((5000 + 500) / 6)
-CHUNK_OVERLAP_FRAMES = 20
 LOCATE_WORKERS = 0  # 0 = use all CPU cores; set 1 to minimize worker memory.
 
 ## Camera parameters
@@ -64,7 +59,12 @@ FORCE_ULTRA_UNIFORM = False  # whether to force ultra uniform particle distribut
 SINGLE_PARTICLE_ENABLED = False  # whether to enable single particle stitching mode (True/False)
 SINGLE_PARTICLE_KEEP = "longest"  # which stitched trajectory to analyse: "longest" = most detections, "brightest" = largest total mass, "all" = every stitched trajectory
 
-
+## Chunking and GPU processing parameters
+GPU_ENABLED = False
+CHUNK_FRAMES = int((5000 + 500) / 6)
+CHUNK_OVERLAP_FRAMES = 20
+PROCESSING_MODE: Literal["single_stack", "chunked"] = "single_stack"
+BACKGROUND_STACK_STORAGE: Literal["memory", "disk"] = "memory"
 
 ## Analysis parameters
 # These use the legacy parameter names and units for compatibility.
