@@ -36,6 +36,7 @@ from .msd import estimate_all
 from .ultra_uniform import ultra_uniform_mask
 from .hindrance import corrected_diameter_nm, local_channel_diameter_nm
 from .calibration import estimate_channel_center_from_tiff
+from .input_checks import ask_yes_no
 from dataclasses import replace
 
 from scipy.ndimage import gaussian_filter
@@ -297,10 +298,17 @@ class AnalysisPipeline:
     def _calibrate_detection(self, scale_max: float | None) -> None:
         """Set trackpy diameter and/or minmass automatically, as the 1.0 help functions do."""
         config = self.config
-        if not (config.auto_diameter or config.auto_minmass):
+        if not (
+            config.interactive_diameter or config.auto_diameter or config.auto_minmass
+        ):
             return
         updates: dict[str, float | int] = {}
-        if config.auto_diameter:
+        if config.interactive_diameter:
+            updates["particle_diameter"] = self._interactive_particle_diameter(
+                scale_max
+            )
+            update(f"Selected trackpy diameter: {updates['particle_diameter']} px")
+        elif config.auto_diameter:
             updates["particle_diameter"] = trackpy_diameter(
                 config.numerical_aperture,
                 config.wavelength_nm,
@@ -312,9 +320,95 @@ class AnalysisPipeline:
             diameter = int(updates.get("particle_diameter", config.particle_diameter))
             updates["particle_minmass"] = self._auto_minmass(diameter, scale_max)
             update(f"Auto trackpy minmass: {updates['particle_minmass']:g}")
-        self.config = replace(config, **updates)
+        self.config = replace(config, interactive_diameter=False, **updates)
         (config.output_dir / "auto_parameters.json").write_text(
             json.dumps(updates, indent=2), encoding="utf-8"
+        )
+
+    def _interactive_particle_diameter(self, scale_max: float | None) -> int:
+        """Find a usable Trackpy diameter by visually checking subpixel bias."""
+        config = self.config
+        info = tiff_info(config.input_file)
+        stop = info["shape"][0] if config.frame_stop is None else min(
+            config.frame_stop, info["shape"][0]
+        )
+        sample_stop = min(config.frame_start + 100, stop)
+        frames = [
+            to_processing_bit_depth(
+                image[config.roi.y_slice, config.roi.x_slice],
+                config.processing_bit_depth,
+            )
+            for _, image in iter_tiff_frames(
+                config.input_file, config.frame_start, sample_stop
+            )
+        ]
+        if not frames:
+            raise RuntimeError("No frames are available for the diameter check")
+
+        processed = preprocess(
+            np.stack(frames),
+            config.remove_camera_offset,
+            config.remove_laser_fluctuation,
+            config.remove_static_background,
+            config.background_method,
+            config.enhance_snr,
+            background=self.global_background,
+            offset=self.global_offset,
+            snr_sigma_px=config.effective_snr_sigma_px,
+        )
+        image_stack = to_uint16(processed, scale_max=scale_max)
+        _, _, height, width = self._source_range_and_shape()
+        max_diameter = min(height, width)
+        if max_diameter % 2 == 0:
+            max_diameter -= 1
+        max_diameter = min(
+            max_diameter,
+            trackpy_diameter(
+                config.numerical_aperture,
+                config.wavelength_nm,
+                config.pixel_size_um,
+                config.enhance_snr,
+            )
+            + 10,
+        )
+        if max_diameter < 3:
+            raise ValueError("The selected image region is too small for Trackpy")
+
+        import matplotlib.pyplot as plt
+        import trackpy as tp
+
+        for diameter in range(3, max_diameter + 1, 2):
+            update(f"Checking Trackpy diameter {diameter} px")
+            detections = locate(
+                image_stack,
+                diameter,
+                config.particle_minmass,
+                config.particle_separation,
+                config.particle_percentile,
+                preprocess=not config.enhance_snr,
+                workers=config.locate_workers,
+            )
+            if detections.empty:
+                update("No particles found at this diameter; trying the next size")
+                continue
+
+            tp.subpx_bias(detections)
+            figure = plt.gcf()
+            figure.suptitle(f"Subpixel localization bias (tp_diameter={diameter} px)")
+            plt.show(block=True)
+            try:
+                accepted = ask_yes_no(
+                    "The histogram should be flat, without a dip in the middle. "
+                    "Are particles detected and is this diameter acceptable?"
+                )
+            finally:
+                plt.close(figure)
+            if accepted:
+                return diameter
+
+        raise RuntimeError(
+            "No acceptable Trackpy diameter was selected. Set Find.tp_diameter "
+            "to a numeric odd value and try again."
         )
 
     def _auto_minmass(self, diameter: int, scale_max: float | None) -> float:

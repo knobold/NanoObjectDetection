@@ -165,8 +165,8 @@ acceptable for the experiment.
 | `fps` | Acquisition frame rate. Used for time axes and MSD. |
 | `ExposureTime` | Exposure time in seconds. Used by `Estimate_X = "Theory"`; there is no separate motion-blur correction in the ordinary MSD fit. |
 | `Microns_per_pixel` | Spatial calibration used for diffusion and diameter. |
-| `Temperature` | Temperature in K. |
-| `Viscosity` | 1.0 viscosity convention, converted to Pa s internally. |
+| `Temperature` | Sample temperature in degrees Celsius; converted to K internally. |
+| `Viscosity` | Set to `"water"` to calculate water viscosity from temperature, or provide a numeric value in the 1.0 viscosity convention (converted to Pa s internally). |
 
 Wavelength and NA also determine the PSF estimate used by automatic Trackpy
 diameter and Gaussian SNR-kernel sizing. Exposure time, NA, and wavelength are
@@ -210,18 +210,26 @@ it is recalculated on each run.
 
 | Parameter | Effect |
 |---|---|
-| `tp_diameter` | Odd Trackpy feature diameter in pixels. |
+| `tp_diameter` | Odd Trackpy feature diameter in pixels, or `"auto"` for an interactive subpixel-bias check. |
 | `tp_minmass` | Integrated feature-mass threshold. |
 | `tp_separation` | Minimum separation between features. |
 | `tp_percentile` | Percentile threshold used by Trackpy. |
+| `SaturatedPixelValue` | `"No Saturation"`, a numeric pixel threshold, or `"auto"` for an interactive raw-intensity histogram check. |
 
-These values retain the 1.0 intensity scaling convention. A threshold tuned
-for another preprocessing method is not interchangeable.
+Trackpy's minmass and percentile values retain the 1.0 intensity scaling
+convention; a minmass threshold tuned for another preprocessing method is not
+interchangeable. The saturation threshold is expressed in raw input pixel
+units.
+
+For `"auto"` saturation, the histogram is built from up to ten frames that
+contain the maximum value in the selected frame range and ROI. If saturation
+is confirmed, that observed maximum is used as the detection threshold;
+otherwise saturation handling is disabled.
 
 `Help["Bead size"]` enables PSF-derived diameter and
 `Help["Bead brightness"]` enables automatic minmass calibration; details are
-in [Automatic parameters](#automatic-parameters). If both are disabled,
-`tp_diameter` and `tp_minmass` are used directly.
+in [Automatic parameters](#automatic-parameters). If both are disabled and
+`tp_diameter` is numeric, `tp_diameter` and `tp_minmass` are used directly.
 
 ### 4.6 `Link` and stationary objects
 
@@ -462,9 +470,11 @@ mode first, then compare `chunked` CPU mode, and only then enable GPU mode.
 ## Automatic parameters (ported from 1.0)
 
 - `Help["Bead size"] = 1`: `tp_diameter` is derived from the PSF width (sigma = 0.21·lambda/NA, 4 sigma in px, times sqrt(2) with `EnhanceSNR`, rounded up to an odd number).
+- `Find["tp_diameter"] = "auto"`: the first 100 selected frames are localized starting at 3 px. Trackpy's subpixel-bias histogram is shown for each candidate; accept a flat distribution without a center dip, or reject it to try the next diameter in steps of 2, up to 10 px above the PSF estimate and the image-size limit. If no candidate is accepted, set a numeric odd diameter instead.
 - `Help["Bead brightness"] = 1`: `tp_minmass` is calibrated. `TryFrames` evenly spaced frames are searched by ZNCC (`ZNCC_min`); trackpy minmass is then tuned until it reproduces that particle set, and 0.9 × the optimum is used. The result is saved to `auto_parameters.json`.
+- `Find["SaturatedPixelValue"] = "auto"`: an intensity histogram of up to ten frames containing the maximum pixel value is shown and the user confirms whether saturation is present.
 - `PreProcessing["KernelSize"]`: `"auto"` uses the PSF sigma for the `EnhanceSNR` Gaussian filter, a number sets sigma in px.
-- `MSD["Estimate_X"] = "Theory"`: the reduced localisation error in the lag-time optimisation comes from NA, lambda and ExposureTime (Michalet & Berglund; D = 1 µm²/s, 1 photon as in 1.0) instead of the MSD fit offset. Not ported: the 1.0 `FindChannel` mask and the interactive diameter selection.
+- `MSD["Estimate_X"] = "Theory"`: the reduced localisation error in the lag-time optimisation comes from NA, lambda and ExposureTime (Michalet & Berglund; D = 1 µm²/s, 1 photon as in 1.0) instead of the MSD fit offset. Not ported: the 1.0 `FindChannel` mask.
 
 If all candidate trajectories are rejected by analysis filters (for example,
 the Brownian-motion quality test), 2.0 reports that condition and skips

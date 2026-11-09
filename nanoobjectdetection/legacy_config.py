@@ -34,6 +34,20 @@ def _saturation(value):
         return None
 
 
+def _viscosity_pa_s(value, temperature_c: float) -> float:
+    """Return viscosity in Pa s from a legacy-unit value or the ``water`` option."""
+    if isinstance(value, str) and value.strip().lower() == "water":
+        if not 0 <= temperature_c <= 100:
+            raise ValueError("Automatic water viscosity is supported from 0 to 100 degrees Celsius")
+        temperature_k = temperature_c + 273.15
+        return 2.414e-5 * 10 ** (247.8 / (temperature_k - 140))
+
+    viscosity_legacy = _number(value, None)
+    if viscosity_legacy is None:
+        raise ValueError("Viscosity must be 'water' or a numeric legacy-unit value")
+    return viscosity_legacy * 1e12
+
+
 def load_parameter_file(parameter_file: str | Path) -> tuple[AnalysisConfig, dict]:
     """Translate a 1.0 ``parameter.json`` into an equivalent 2.0 config."""
     parameter_path = Path(parameter_file)
@@ -87,6 +101,13 @@ def load_parameter_settings(
     output_dir = Path(settings["Plot"].get("SaveFolder", parameter_path.parent))
     if not output_dir.is_absolute() or not output_dir.exists():
         output_dir = parameter_path.parent / "analysis" / "pipeline_2_0"
+    temperature_c = _number(exp.get("Temperature"), 20.0)
+    tp_diameter = find.get("tp_diameter", 7)
+    interactive_diameter = (
+        isinstance(tp_diameter, str) and tp_diameter.strip().lower() == "auto"
+    )
+    if interactive_diameter:
+        tp_diameter = 3
 
     config = AnalysisConfig(
         input_file=input_file,
@@ -99,8 +120,8 @@ def load_parameter_settings(
         wavelength_nm=_number(exp.get("lambda"), 532.0),
         numerical_aperture=_number(exp.get("NA"), 0.25),
         exposure_time_s=_number(exp.get("ExposureTime"), 0.0007),
-        temperature_k=_number(exp.get("Temperature"), 293.15),
-        viscosity_pa_s=_number(exp.get("Viscosity"), 0.001) * 1e12,
+        temperature_k=temperature_c + 273.15,
+        viscosity_pa_s=_viscosity_pa_s(exp.get("Viscosity"), temperature_c),
         channel_diameter_nm=_number(fiber.get("TubeDiameter_nm"), 0.0) or None,
         channel_center_y_px=(
             _number(fiber.get("Center_y_px"), 0.0)
@@ -116,6 +137,7 @@ def load_parameter_settings(
         remove_static_background=bool(preprocessing.get("Remove_StaticBackground", 1)),
         enhance_snr=bool(preprocessing.get("EnhanceSNR", 0)),
         snr_kernel_sigma_px=_kernel_sigma(preprocessing.get("KernelSize", "auto")),
+        interactive_diameter=interactive_diameter,
         zncc_min=_number(preprocessing.get("ZNCC_min"), 0.7),
         auto_minmass=_flag(help_settings.get("Bead brightness", 0)),
         auto_diameter=_flag(help_settings.get("Bead size", 0)),
@@ -130,7 +152,7 @@ def load_parameter_settings(
         stitch_min_fragment_frames=int(single.get("Min fragment frames", 3)),
         background_method="legacy_trimmed_mean",
         intensity_normalization="global",
-        particle_diameter=int(find.get("tp_diameter", 7)),
+        particle_diameter=int(tp_diameter),
         particle_minmass=_number(find.get("tp_minmass"), 358.0),
         particle_separation=int(find.get("tp_separation", 20)),
         particle_percentile=_number(find.get("tp_percentile"), 20.0),

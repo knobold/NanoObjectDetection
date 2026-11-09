@@ -54,6 +54,7 @@ class AnalysisConfig:
     enhance_snr: bool = False
     snr_kernel_sigma_px: float | None = None
     auto_diameter: bool = False
+    interactive_diameter: bool = False
     auto_minmass: bool = False
     zncc_min: float = 0.7
     minmass_try_frames: int = 30

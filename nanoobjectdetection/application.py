@@ -28,6 +28,7 @@ from .legacy_config import (
     load_parameter_settings,
 )
 from .auto_parameters import trackpy_diameter
+from .input_checks import check_saturation
 from .legacy_outputs import export_legacy_aliases
 from .pipeline import AnalysisPipeline
 from .storage import tiff_info
@@ -52,8 +53,8 @@ FPS=100.0
 
 ## Sample parameters
 ESTIMATED_PARTICLE_SIZE=50.0 # estimated particle size in nm (should be roughly the nominal value - 10%)
-TEMPERATURE_K = 293.85  # sample temperature in K (20 C = 293.15)
-VISCOSITY = 9.846562548618592e-16  # solvent viscosity in legacy units (kg/(um*s)); water 20 C ~ 1e-15
+TEMPERATURE_C = 20.7  # sample temperature in degrees Celsius
+VISCOSITY = "water"  # calculate water viscosity from TEMPERATURE_C, or provide a numeric legacy-unit value
 CHANNEL_DIAMETER_NM = 20600.0  # channel/fibre inner diameter in nm; needed for hindrance correction (0 = off)
 
 ## Trackpy Parameters
@@ -74,12 +75,12 @@ def estimate_tp_diameter(
         pixel_size_um,
         enhance_snr,
     )
-TP_DIAMETER = 7# estimate_tp_diameter(NA, LAMBDA, CAMERA_MICRONS_PER_PIXEL, ENHANCE_SNR)  # only used if AUTO_TP is False #7 is sensible value
+TP_DIAMETER = 7  # odd Trackpy feature diameter in px, or "auto" for the interactive subpixel-bias check
 TP_MINMASS = 358  # trackpy minimum mass (only used if AUTO_TP is False)
 
 ## Other Processing Parameters
 CORRECT_DRIFT = True
-SATURATED_PIXEL_VALUE = "No Saturation"
+SATURATED_PIXEL_VALUE = "No Saturation"  # "auto" plots an intensity histogram and asks whether saturation is present
 ESTIMATE_HINDRANCE = True  # whether to estimate hindrance correction (True/False) needs TubeDiameter_nm 
 HINDERANCE_POSITION_AWARE = False  # whether to consider the particle position within the channel for hindrance correction (True/False)
 
@@ -100,10 +101,8 @@ PARAMETERS = {
         "fps": FPS,  # camera frame rate in frames/s
         "ExposureTime": 0.0007,  # camera exposure time in s (must be <= 1/fps); used by Estimate_X "Theory"
         "Microns_per_pixel": CAMERA_MICRONS_PER_PIXEL,  # pixel size in the sample plane in um
-        "Temperature": TEMPERATURE_K,  # sample temperature in K (20 C = 293.15)
-        "Viscosity": VISCOSITY,  # solvent viscosity in legacy units (kg/(um*s))
-        "Viscosity_auto": 0,  # [unused] 1 = compute viscosity from Temperature/solvent in 1.0
-        "solvent": "water",  # [unused] solvent name for Viscosity_auto: "water" or "glycerol"
+        "Temperature": TEMPERATURE_C,  # sample temperature in degrees Celsius
+        "Viscosity": VISCOSITY,  # "water" calculates automatically; numeric values use legacy units (kg/(um*s))
     },
     "Fiber": {
         "Mode": "Gaussian",  # [unused] illumination profile in 1.0: "Gaussian" or "Flat"
@@ -151,9 +150,9 @@ PARAMETERS = {
         "Intensity Jump": 1,  # 1 = auto-estimate intensity jump threshold
     },
     "Find": {
-        "tp_diameter": TP_DIAMETER,  # Trackpy feature size in px; odd integer >= 3, slightly above the particle spot size
+        "tp_diameter": TP_DIAMETER,  # odd integer >= 3 or "auto" for the interactive subpixel-bias check
         "tp_minmass": TP_MINMASS,  # Trackpy minimum feature mass
-        "SaturatedPixelValue": SATURATED_PIXEL_VALUE,  # "No Saturation" or raw pixel value (e.g. 255, 4095, 65535); spots reaching it are excluded from the MSD fit
+        "SaturatedPixelValue": SATURATED_PIXEL_VALUE,  # "auto", "No Saturation", or pixel threshold; saturated detections are excluded from the MSD fit
         "tp_separation": 20,  # min distance between spots in px
         "tp_percentile": 20,  # Trackpy brightness percentile filter, 0-100
     },
@@ -475,6 +474,7 @@ def _run_analysis(parameter_file: Path | str | None = None, *,
         parameter_file = Path(parameter_file)
         config, settings = load_parameter_file(parameter_file)
         parameter_source = str(parameter_file.resolve())
+    settings = deepcopy(settings)
     config = replace(
         config,
         input_file=input_file,
@@ -487,6 +487,20 @@ def _run_analysis(parameter_file: Path | str | None = None, *,
         chunk_overlap_frames=chunk_overlap_frames,
         locate_workers=locate_workers,
     )
+    find_settings = settings.setdefault("Find", {})
+    if str(find_settings.get("SaturatedPixelValue", "")).strip().lower() == "auto":
+        saturation_value = check_saturation(
+            config.input_file,
+            config.frame_start,
+            config.frame_stop,
+            config.roi.y_slice,
+            config.roi.x_slice,
+        )
+        find_settings["SaturatedPixelValue"] = (
+            saturation_value if saturation_value is not None else "No Saturation"
+        )
+        config = replace(config, saturated_pixel_value=saturation_value)
+
     pipeline = AnalysisPipeline(config)
     _log_stage(f"Preparing image store ({processing_mode} mode)")
     pipeline.prepare_store()
