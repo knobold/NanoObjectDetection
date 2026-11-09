@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nanoobjectdetection"
-version = "2.2.0"
+version = "2.2.1"
 description = "Particle localization and diffusion analysis for TIFF image stacks"
 readme = "README.md"
 requires-python = ">=3.10"
